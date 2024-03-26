@@ -51,8 +51,11 @@ android {
 
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
+    //noinspection UseTomlInstead
     implementation("androidx.compose.material3:material3-window-size-class")
+    //noinspection UseTomlInstead
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -61,8 +64,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
