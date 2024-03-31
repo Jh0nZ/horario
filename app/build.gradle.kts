@@ -64,6 +64,14 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    //implementation("org.apache.pdfbox:pdfbox:2.0.24")
+    implementation("com.itextpdf:itextg:5.5.10")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+
+    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-gif:2.1.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,15 +1,24 @@
-package com.example.horario
+package com.example.horario.Control
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
+import com.example.horario.Boundary.Grupo
+import com.example.horario.Boundary.generarColorUnicoParaCodigo
 import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
-class Horario(val saltosTiempo: Int = 90) {
-    private val intervalos: MutableList<Intervalo> = mutableListOf()
-    private var horaMinima: Tiempo = Tiempo(23,59)
-    private var horaMaxima: Tiempo = Tiempo()
+class Horario(
+    val saltosTiempo: Int = 90
+) {
+    val intervalos = mutableStateListOf<Intervalo>()
+
+    fun obtenerMinimo(): Tiempo {
+        return intervalos.minByOrNull{ it.inicio }?.inicio?.copy()?: Tiempo(6, 45)
+    }
+
+    fun obtenerMaximo(): Tiempo {
+        return intervalos.maxByOrNull { it.fin }?.fin?.copy() ?: Tiempo(12,45)
+    }
 
     fun agregarIntervalo(
         nombre: String,
@@ -21,7 +30,48 @@ class Horario(val saltosTiempo: Int = 90) {
     ) {
         val nuevoIntervalo = Intervalo(nombre, horaInicio, horaFin, dia, color, aula)
         intervalos.add(nuevoIntervalo)
-        actualizarHoras(nuevoIntervalo)
+    }
+
+    fun agregarGrupo(
+        grupo: Grupo
+    ) {
+        grupo.intervalos.forEach {
+            val nuevoIntervalo = Intervalo(
+                grupo.extraMateria,
+                Tiempo(it.h_inicio),
+                Tiempo(it.h_fin),
+                text2Day(it.dia),
+                generarColorUnicoParaCodigo(grupo.extraMateria+grupo.nombre),
+                it.aula,
+                it.extraIGrupo
+            )
+            intervalos.add(nuevoIntervalo)
+        }
+    }
+    fun quitarGrupo(grupo: Grupo) {
+        val aremover = mutableListOf<Intervalo>()
+        intervalos.forEach {
+            if (it.nombre == grupo.extraMateria && it.nro_grupo == grupo.nombre) {
+                aremover.add(it)
+            }
+        }
+        aremover.forEach {
+            intervalos.remove(it)
+        }
+    }
+
+
+    fun text2Day(diaTexto: String): DayOfWeek {
+        return when (diaTexto.uppercase()) {
+            "LU" -> DayOfWeek.MONDAY
+            "MA" -> DayOfWeek.TUESDAY
+            "MI" -> DayOfWeek.WEDNESDAY
+            "JU" -> DayOfWeek.THURSDAY
+            "VI" -> DayOfWeek.FRIDAY
+            "SA" -> DayOfWeek.SATURDAY
+            "DO" -> DayOfWeek.SUNDAY
+            else -> DayOfWeek.SUNDAY // Valor predeterminado si no coincide ninguno
+        }
     }
 
     fun obtenerDia(dia: DayOfWeek): List<Intervalo> {
@@ -30,9 +80,15 @@ class Horario(val saltosTiempo: Int = 90) {
     }
 
     fun getUsedDays(): List<DayOfWeek> {
-        return intervalos.map { it.dia }
-            .distinct() // Unicos
+        val diasUtilizados = intervalos.map { it.dia }
+            .distinct() // Días únicos
             .sorted()   // Ordenados
+
+        return if (diasUtilizados.isNotEmpty()) {
+            diasUtilizados
+        } else {
+            listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)
+        }
     }
 
     fun obtenerChoquesDeHorario(dia: DayOfWeek): List<Intervalo> {
@@ -58,8 +114,8 @@ class Horario(val saltosTiempo: Int = 90) {
     fun obtenerDiaFormato(dia: DayOfWeek): List<Intervalo> {
         val respuesta: MutableList<Intervalo> = mutableListOf()
         val invertalosDelDia = obtenerDia(dia)
-        var hora_inicial = horaMinima
-        val auxiliar = horaMaxima.copy()
+        var hora_inicial = obtenerMinimo()
+        val auxiliar = obtenerMaximo()
         for (inverval in invertalosDelDia) {
             if (hora_inicial != null) {
                 if (hora_inicial == inverval.inicio) {
@@ -103,16 +159,7 @@ class Horario(val saltosTiempo: Int = 90) {
 
         return respuesta
     }
-
-    fun obtenerHoraMinima(): Tiempo {
-        return horaMinima
-    }
-
-    fun obtenerHoraMaxima(): Tiempo {
-        return horaMaxima
-    }
-
-    fun obtenerHoras(intervalo: Int = saltosTiempo, minimo: Tiempo? = horaMinima, maximo: Tiempo? = horaMaxima): List<String> {
+    fun obtenerHoras(intervalo: Int = saltosTiempo, minimo: Tiempo? = obtenerMinimo(), maximo: Tiempo? = obtenerMaximo()): List<String> {
         val respuesta:MutableList<String> = mutableListOf()
         var horita: Tiempo? = minimo
         while (horita!! <= maximo!!) {
@@ -126,14 +173,12 @@ class Horario(val saltosTiempo: Int = 90) {
         return intervaloA.inicio < intervaloB.fin && intervaloB.inicio < intervaloA.fin
     }
 
-    private fun actualizarHoras(intervalo: Intervalo) {
-        if (intervalo.inicio < horaMinima) {
-            horaMinima = intervalo.inicio
-        }
-        if (intervalo.fin > horaMaxima) {
-            horaMaxima = intervalo.fin
-        }
+    fun ejemplo(): Horario {
+        testHorario(this)
+        return this
     }
+
+
 }
 
 fun obtenerHorasString(intervalo: Int, minimo: Tiempo, maximo: Tiempo): List<String> {
@@ -152,7 +197,8 @@ open class Intervalo(
     val fin: Tiempo,
     val dia: DayOfWeek,
     val color: Color = Color.White,
-    val aula: String = ""
+    val aula: String = "",
+    val nro_grupo: String = ""
 ) {
     val duracion: Int = diferenciaMinutos(inicio, fin)
 
@@ -170,13 +216,6 @@ open class Intervalo(
         return "$nombre, $inicio, $fin, $dia, $duracion"
     }
 }
-
-fun main22() {
-    val int1 = Intervalo(inicio = Tiempo(), fin = Tiempo(5,0), dia = DayOfWeek.TUESDAY, nombre = null)
-    println(int1)
-}
-
-
 class IntervaloChoque(nombre: String?, val choques: List<Intervalo>)
     : Intervalo(nombre = nombre, inicio = choques.minOf { it.inicio }, fin = choques.maxOf { it.fin }, dia = choques.first().dia) {
 
@@ -185,27 +224,22 @@ class IntervaloChoque(nombre: String?, val choques: List<Intervalo>)
     }
 }
 
-fun main47() {
-    val horario = testHorario()
-
-    val lunes = horario.obtenerDia(DayOfWeek.MONDAY)
-    println("Intervalos para el lunes:")
-    lunes.forEach { println(it.toString()) }
-
-    val diasUsados = horario.getUsedDays()
-    println("\nDías usados en el horario:")
-    diasUsados.forEach { println("- $it") }
-
-
-    println(horario.obtenerHoraMinima())
-    println(horario.obtenerHoraMaxima())
-
-    val asa = horario.obtenerDiaFormato(DayOfWeek.TUESDAY)
-    asa.forEach { println("- $it") }
+fun main22() {
+    val int1 = Intervalo(inicio = Tiempo(), fin = Tiempo(5,0), dia = DayOfWeek.TUESDAY, nombre = null)
+    println(int1)
 }
 
-fun testHorario(): Horario {
-    val horario = Horario()
+
+fun main() {
+    val horario = Horario().ejemplo()
+
+    println(horario)
+    println(horario)
+}
+
+fun testHorario(
+    horario: Horario = Horario()
+): Horario {
     horario.agregarIntervalo(
         "Taller de sistemas operativos",
         Tiempo(8, 15),
@@ -322,6 +356,5 @@ fun testHorario(): Horario {
         Color(243, 69, 69, 255),
         "691D"
     )
-
     return horario
 }
