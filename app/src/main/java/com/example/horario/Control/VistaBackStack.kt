@@ -20,16 +20,16 @@ class VistaBackStack : ViewModel() {
     var currentSemestreObject: Semestre? = null
     var currentMateriaObject: Materia? = null
     var currentMateria = mutableStateOf("Seleccionar materia")
-    var contruirHorario = Horario()
-    var horario = Horario().ejemplo()
+    var contruirHorario = mutableStateOf(Horario())
+    val horario = mutableStateOf(Horario().ejemplo())
 
     fun guardarHorario(context: Context) {
-        horario = contruirHorario
-        contruirHorario = Horario()
+        horario.value = contruirHorario.value
+        contruirHorario.value = Horario()
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val editor = prefs.edit()
         val gson = Gson()
-        val horarioJson = gson.toJson(horario)
+        val horarioJson = gson.toJson(horario.value)
         editor.putString("horario", horarioJson)
         editor.apply()
     }
@@ -38,7 +38,8 @@ class VistaBackStack : ViewModel() {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val gson = Gson()
         val savedHorario = prefs.getString("horario", null)
-        horario =  gson.fromJson(savedHorario, Horario::class.java)?: Horario()
+        val horrr = gson.fromJson(savedHorario, Horario::class.java)?: Horario()
+        horario.value = horrr
     }
 
     fun cargarCarrera(context: Context) {

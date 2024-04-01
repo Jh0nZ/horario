@@ -20,14 +20,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
@@ -196,17 +201,6 @@ fun aaa(
                 )
                 Divider()
                 NavigationDrawerItem(
-                    label = { Text(text = "Ajustes") },
-                    selected = false,
-                    onClick = {
-                        cambio = "Ajustes"
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    }
-                )
-                Divider()
-                NavigationDrawerItem(
                     label = { Text(text = "Leer pdf") },
                     selected = false,
                     onClick = {
@@ -233,6 +227,17 @@ fun aaa(
                     selected = false,
                     onClick = {
                         cambio = "Editar horario"
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    }
+                )
+                Divider()
+                NavigationDrawerItem(
+                    label = { Text(text = "Ajustes") },
+                    selected = false,
+                    onClick = {
+                        cambio = "Ajustes"
                         scope.launch {
                             drawerState.close()
                         }
@@ -303,7 +308,7 @@ fun aaa(
             ) {
                 when (vistaBack.currentLocation.value) {
                     "/" -> {
-                        vistaDeDiaConHora()
+                        vistaDeDiaConHora(vistaBack = vistaBack)
                     }
                     "Dia" -> {
                         vistaDeDiaPager(vistaBack = vistaBack)
@@ -338,12 +343,12 @@ fun aaa(
 
     if (openBottonSheet.value) {
         ModalBottomSheet(
-            tonalElevation = 0.dp, //color color de scrim oscurecido arriba
-            contentColor = Color.White,
-            containerColor = Color(17,17,77),
+            //tonalElevation = 0.dp, //color color de scrim oscurecido arriba
+            contentColor = Color(19,19,19),
+            containerColor = Color(255, 235, 178, 255),
             sheetState = bottomSheetState2,
             scrimColor = Color.Transparent,
-            windowInsets = BottomSheetDefaults.windowInsets,//espacio arriba
+            //windowInsets = BottomSheetDefaults.windowInsets, //espacio arriba
             onDismissRequest = {openBottonSheet.value = false},
             dragHandle = {
                 Text(text = "---------------") // esto es la cabezera
@@ -355,7 +360,6 @@ fun aaa(
                 Box (
                     contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
-                        .background(Color(20, 20, 20))
                         .fillMaxWidth()
                         .height(50.dp)
                 ) {
@@ -364,9 +368,10 @@ fun aaa(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Text(
-                            text = "Seleccionar Materia",
+                            text = "Seleccionar grupo",
                             textAlign = TextAlign.Center,
                             fontSize = 22.sp,
+                            color = Color(29, 29, 29, 255)
                         )
                     }
                     IconButton(onClick = {
@@ -375,49 +380,84 @@ fun aaa(
                         Icon(imageVector = Icons.Default.Close, contentDescription = null)
                     }
                 }
-                Button(onClick = {
-                    currentOption = "semestre"
-                    openSelectMateria.value = true
-                }) {
-                    Text(text = vistaBack.currentSemestre.value)
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(231, 95, 255, 255),
+                        contentColor = Color(29, 29, 29, 255),
+                        disabledContainerColor = Color(243, 173, 255, 255),
+                        disabledContentColor = Color(133, 133, 133, 255)
+                    ),
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        currentOption = "semestre"
+                        openSelectMateria.value = true
+                    }
+                ) {
+                    Text(
+                        text = vistaBack.currentSemestre.value,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.widthIn(200.dp)
+                    )
                 }
-                Button(onClick = {
-                    currentOption = "materia"
-                    openSelectMateria.value = true
-                }) {
-                    Text(text = vistaBack.currentMateria.value)
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(231, 95, 255, 255),
+                        contentColor = Color(29, 29, 29, 255),
+                        disabledContainerColor = Color(243, 173, 255, 255),
+                        disabledContentColor = Color(133, 133, 133, 255)
+                    ),
+                    onClick = {
+                        currentOption = "materia"
+                        openSelectMateria.value = true
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = vistaBack.currentMateria.value,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.widthIn(200.dp)
+                    )
                 }
                 LazyColumn (
-                    horizontalAlignment = Alignment.CenterHorizontally,
-
+                    horizontalAlignment = Alignment.Start,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(86, 255, 187, 255))
-                        .requiredHeight(400.dp)
-
+                        .fillMaxSize()
+                        .padding(10.dp)
                 ) {
                     val semestre = vistaBack.carrera.getSemestre(vistaBack.currentSemestre.value)
                     if (semestre != null) {
                         val materia = semestre.getMateria(vistaBack.currentMateria.value)
                         if (materia != null) {
+                            item {
+                                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                            }
                             items(materia.grupos) {grupo ->
-                                Row {
-                                    Text(text = grupo.toString())
+                                Row (
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = grupo.toString(),
+                                        modifier = Modifier.width(300.dp).padding(8.dp)
+                                    )
                                     Checkbox(
                                         checked = grupo.seleccionado,
                                         onCheckedChange = {
                                             Log.d("test", "grupo sel: ${grupo.seleccionado}, check: $it")
                                             grupo.seleccionado = it
                                             if (it) {
-                                                vistaBack.contruirHorario.agregarGrupo(grupo)
+                                                vistaBack.contruirHorario.value.agregarGrupo(grupo)
                                             } else {
-                                                vistaBack.contruirHorario.quitarGrupo(grupo)
+                                                vistaBack.contruirHorario.value.quitarGrupo(grupo)
                                             }
                                             openBottonSheet.value = false
                                         }
                                     )
                                 }
-
+                                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
                             }
                         }
                     }
@@ -429,11 +469,11 @@ fun aaa(
 
     if (openSelectMateria.value) {
         ModalBottomSheet(
-            tonalElevation = 0.dp, //color color de scrim oscurecido arriba
-            contentColor = Color.White,
-            containerColor = Color(17,17,77),
+            //tonalElevation = 0.dp, //color color de scrim oscurecido arriba
+            contentColor = Color(29,29,29),
+            containerColor = Color(139, 147, 255, 255),
             sheetState = bottomSheetState,
-            scrimColor = Color(111, 236, 43, 59),
+            //scrimColor = Color(111, 236, 43, 59),
             windowInsets = BottomSheetDefaults.windowInsets,//espacio arriba
             onDismissRequest = {openSelectMateria.value = false},
             dragHandle = {
@@ -444,7 +484,6 @@ fun aaa(
                 Box (
                     contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
-                        .background(Color(19, 19, 19, 39))
                         .fillMaxWidth()
                         .height(50.dp)
                 ) {
@@ -467,7 +506,7 @@ fun aaa(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(86, 255, 187, 255))
+                        //.background(Color(86, 255, 187, 255))
                         .requiredHeight(400.dp)
 
                 ) {
@@ -475,29 +514,51 @@ fun aaa(
                     if (currentOption == "semestre") {
 
                         items(vistaBack.carrera.semestres) {
-                            Button(onClick = {
-                                vistaBack.currentSemestre.value = it.nivel
-                                vistaBack.currentMateria.value = "Seleccionar carrera"
-                                openSelectMateria.value = false
-                            }) {
-                                Text(text = it.nivel)
+                            Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(87, 85, 254, 255), // Color de fondo del botón
+                                    contentColor = Color.White // Color del texto del botón
+                                ),
+                                modifier = Modifier
+                                    .widthIn(150.dp)
+                                    .padding(8.dp),
+                                onClick = {
+                                    vistaBack.currentSemestre.value = it.nivel
+                                    vistaBack.currentMateria.value = "Seleccionar carrera"
+                                    openSelectMateria.value = false
+                                }
+                            ) {
+                                Text(
+                                    text = it.nivel,
+                                    color = Color.White
+                                )
                             }
                         }
                     } else {
                         val semestre = vistaBack.carrera.getSemestre(vistaBack.currentSemestre.value)
                         if (semestre != null) {
                             items(semestre.materias) {
-                                Button(onClick = {
-                                    vistaBack.currentMateria.value = it.nombre
-                                    openSelectMateria.value = false
-                                }) {
-                                    Text(text = it.nombre)
+                                Button(
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(87, 85, 254, 255), // Color de fondo del botón
+                                        contentColor = Color.White // Color del texto del botón
+                                    ),
+                                    modifier = Modifier
+                                        .widthIn(150.dp)
+                                        .padding(8.dp),
+                                    onClick = {
+                                        vistaBack.currentMateria.value = it.nombre
+                                        openSelectMateria.value = false
+                                    }
+                                ) {
+                                    Text(
+                                        text = it.nombre,
+                                        color = Color.White
+                                    )
                                 }
                             }
                         }
-
                     }
-
                 }
             }
         }

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,9 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,9 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.backstack_tests.Control.VistaBackStack
 import com.example.horario.Control.Horario
-import com.example.horario.Control.Intervalo
-import com.example.horario.Control.Tiempo
-import com.example.horario.Control.testHorario
 import java.security.MessageDigest
 import java.time.DayOfWeek
 
@@ -46,7 +43,7 @@ fun vistaHorarioSemana(
                 item {
                     horas(horario = vistaBackStack.horario)
                 }
-                items(vistaBackStack.horario.getUsedDays()) {
+                items(vistaBackStack.horario.value.getUsedDays()) {
                     pruebasDias(horario = vistaBackStack.horario, dia = it)
                 }
             }
@@ -59,7 +56,7 @@ fun vistaHorarioSemana(
 fun horas(
     nombre: String = "HORAS",
     saltos: Int = 90,
-    horario: Horario = Horario().ejemplo(),
+    horario: MutableState<Horario> = mutableStateOf(Horario().ejemplo()),
     modifier: Modifier = Modifier,
     ancho: Dp = 60.dp
 ) {
@@ -75,7 +72,7 @@ fun horas(
                 .width(ancho)
                 .wrapContentHeight(align = Alignment.CenterVertically),
         )
-        for (it in horario.obtenerHoras(90)) {
+        for (it in horario.value.obtenerHoras(90)) {
             Text(
                 text = it,
                 modifier = Modifier
@@ -90,9 +87,9 @@ fun horas(
 @Preview(showBackground = true)
 @Composable
 fun pruebasDias(
-    horario: Horario = Horario().ejemplo(),
+    horario: MutableState<Horario> = mutableStateOf(Horario().ejemplo()),
     modifier: Modifier = Modifier,
-    ancho: Dp = 100.dp,
+    ancho: Dp = 125.dp,
     dia: DayOfWeek = DayOfWeek.FRIDAY
 ) {
     Log.d("pruebaaa", "recomposicion una vez")
@@ -106,7 +103,7 @@ fun pruebasDias(
                 .height(40.dp)
                 .width(ancho)
         )
-        for (inter in horario.obtenerDiaFormato(dia)) {
+        for (inter in horario.value.obtenerDiaFormato(dia)) {
             if (inter.nombre != null) {
                 val colorTexto = if (CalcularLuminosidad(inter.color) < 0.5) Color.White else Color.Black
                 Column(
