@@ -46,6 +46,8 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
@@ -144,6 +146,8 @@ fun aaa(
     var currentOption by remember {
         mutableStateOf("")
     }
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val listaSemetres = listOf("Nivel a", "nivel b", "nivel c", "nivel d", "nivel e", "nivel f", "nivel g",
         "Nivel h", "nivel i", "nivel j", "nivel k", "nivel l", "nivel m", "nivel n",
@@ -276,7 +280,12 @@ fun aaa(
                     },
                     actions = {
                         if (vistaBack.currentLocation.value == "crear horario") {
-                            Button(onClick = {vistaBack.guardarHorario(context)}) {
+                            Button(onClick = {
+                                vistaBack.guardarHorario(context)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Guardado exitosamente")
+                                }
+                            }) {
                                 Text(text = "Guardar")
                             }
                         }
@@ -297,6 +306,11 @@ fun aaa(
                     }
                 }
 
+            },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                )
             }
 
         ) { innerPadding ->
