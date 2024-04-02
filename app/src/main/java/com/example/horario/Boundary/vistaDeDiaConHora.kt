@@ -218,32 +218,45 @@ fun horadia24(
                             //today.dayOfWeek
                             val lista = vistaBackStack.horario.value.obtenerDiaFormato24h(dayOfWeek)
                             if (!lista.isEmpty()) {
-                                for (invertalo in lista) {
-                                    val colorTexto = if (CalcularLuminosidad(invertalo.color) < 0.5) Color.White else Color.Black
+                                for (intervalo in lista) {
+                                    val colorTexto = if (CalcularLuminosidad(intervalo.color) < 0.5) Color.White else Color.Black
                                     Box(
                                         modifier = Modifier
-                                            .height(invertalo.duracion.dp)
+                                            .height(intervalo.duracion.dp)
                                             .fillMaxWidth()
                                             .background(
-                                                if (invertalo.esChoque) Color(160, 160, 160, 255) else invertalo.color,
+                                                if (intervalo.esChoque) Color(221, 221, 221, 255) else intervalo.color,
                                                 shape = RoundedCornerShape(10)
                                             ),
                                     ) {
-                                        if (invertalo.nombre != null) {
+                                        if (intervalo.nombre != null) {
                                             Column(
-                                                verticalArrangement = Arrangement.SpaceBetween
+                                                verticalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
                                             ) {
                                                 Text(
-                                                    text = invertalo.nombre!!,
+                                                    text = intervalo.nombre!!,
                                                     maxLines = 3,
                                                     overflow = TextOverflow.Ellipsis,
-                                                    color = if (invertalo.esChoque) Color.Red else colorTexto
+                                                    color = if (intervalo.esChoque) Color.Red else colorTexto
                                                 )
-                                                Text(
-                                                    text = invertalo.aula,
-                                                    maxLines = 1,
-                                                    color = if (invertalo.esChoque) Color.Red else colorTexto
-                                                )
+                                                Row (
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text(
+                                                        text = intervalo.aula,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        color = if (intervalo.esChoque) Color.Red else colorTexto
+                                                    )
+                                                    Text(
+                                                        text = "G: ${intervalo.nro_grupo}",
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        color = if (intervalo.esChoque) Color.Red else colorTexto
+                                                    )
+                                                }
                                             }
                                         }
 

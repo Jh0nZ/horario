@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,29 +27,39 @@ import androidx.compose.ui.unit.dp
 import com.example.backstack_tests.Control.VistaBackStack
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.InputStream
 
 val regexMateria = Regex("(^[A-Z])\\s(\\d+)\\s([A-Z]+(?:\\.?\\s[A-Z]+)*)\\s([A-Z0-9]*)\\s([A-Z]+)\\s(\\d+)\\s?-\\s?(\\d+)\\s+\\(([A-Za-z0-9]+)\\)\\s([A-Z])\\s(\\.?\\s?[A-Z]+(?:\\s[A-Z]+)*)")
 @Composable
-fun vistaLeerPdf(context: Context, vistaBack: VistaBackStack) {
+fun vistaLeerPdf(context: Context, vistaBack: VistaBackStack, snackbarHostState: SnackbarHostState) {
     val result = remember {
         mutableStateOf<Uri?>(null)
     }
-    // Nuevo estado para controlar el Snackbar
-    var snackbarVisible by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) {
         result.value = it
         it?.let { uri ->
             val exito = leerTextito(uri, context, vistaBack)
             if (exito) {
-                snackbarMessage = "¡Archivo PDF leído exitosamente!"
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "¡Archivo PDF leído exitosamente!",
+                        actionLabel = "Ok",
+                        duration = SnackbarDuration.Short
+                    )
+                }
             } else {
-                snackbarMessage = "Error al leer el archivo PDF"
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message ="Error al leer el archivo pdf",
+                        actionLabel = "Ok",
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
-            snackbarVisible = true
         }
     }
     Box(
@@ -63,22 +76,8 @@ fun vistaLeerPdf(context: Context, vistaBack: VistaBackStack) {
             }) {
                 Text(text = "Seleccionar archivo")
             }
-
-        }
-        if (snackbarVisible) {
-            Snackbar(
-                modifier = Modifier.padding(16.dp),
-                action = {
-                    Button(onClick = { snackbarVisible = false }) {
-                        Text(text = "OK")
-                    }
-                }
-            ) {
-                Text(text = snackbarMessage)
-            }
         }
     }
-
 }
 
 fun leerTextito(

@@ -3,9 +3,12 @@ package com.example.horario.Boundary
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -41,7 +44,6 @@ fun vistaHorarioSemana(
     LazyColumn (
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Blue)
     ) {
         item {
             LazyRow {
@@ -72,7 +74,6 @@ fun horas(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = modifier
-                .background(Color(54, 169, 219, 255))
                 .height(40.dp)
                 .width(ancho)
                 .wrapContentHeight(align = Alignment.CenterVertically),
@@ -97,39 +98,61 @@ fun pruebasDias(
     ancho: Dp = 125.dp,
     dia: DayOfWeek = DayOfWeek.FRIDAY
 ) {
-    Column {
-        Text(
-            text = dia.toString(),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = modifier
-                .background(Color.White)
+    Column (
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
                 .height(40.dp)
-                .width(ancho)
-        )
+                .background(Color.White)
+                .width(ancho),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = day2Spanish(dia),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+
         for (inter in horario.value.obtenerDiaFormatoChoque(dia)) {
             if (inter.nombre != null) {
                 val colorTexto = if (CalcularLuminosidad(inter.color) < 0.5) Color.White else Color.Black
                 Column(
                     verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .background(if (inter.esChoque) Color(160, 160, 160, 255) else inter.color, shape = RoundedCornerShape(10))
+                        .background(
+                            if (inter.esChoque) Color(221, 221, 221, 255) else inter.color,
+                            shape = RoundedCornerShape(10)
+                        )
                         .height(inter.duracion.dp)
                         .width(ancho)
                         .padding(4.dp)
                 ) {
                     Text(
                         text = inter.nombre!!,
-                        maxLines = 2,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
-                        color = if (inter.esChoque) Color.Red else colorTexto
+                        color = if (inter.esChoque) Color(255, 32, 78, 255) else colorTexto
                     )
-                    Text(
-                        text = inter.aula,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = if (inter.esChoque) Color.Red else colorTexto
-                    )
+                    Row (
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = inter.aula,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if (inter.esChoque) Color(255, 32, 78, 255) else colorTexto
+                        )
+                        Text(
+                            text = "G: ${inter.nro_grupo}",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if (inter.esChoque) Color(255, 32, 78, 255) else colorTexto
+                        )
+                    }
                 }
             } else {
                 Spacer(
@@ -161,4 +184,16 @@ fun CalcularLuminosidad(color: Color): Float {
     val g = color.green
     val b = color.blue
     return (0.2126f * r + 0.7152f * g + 0.0722f * b)
+}
+
+fun day2Spanish(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "Lunes"
+        DayOfWeek.TUESDAY -> "Martes"
+        DayOfWeek.WEDNESDAY -> "Miercoles"
+        DayOfWeek.THURSDAY -> "Jueves"
+        DayOfWeek.FRIDAY -> "Viernes"
+        DayOfWeek.SATURDAY -> "Sabado"
+        DayOfWeek.SUNDAY -> "Domingo"
+    }
 }

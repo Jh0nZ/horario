@@ -44,6 +44,7 @@ class Horario(
                 generarColorUnicoParaCodigo(grupo.extraMateria+grupo.nombre),
                 it.aula,
                 it.extraIGrupo
+                /*TODO agregar el tipo (auxiliar)*/
             )
             intervalos.add(nuevoIntervalo)
         }

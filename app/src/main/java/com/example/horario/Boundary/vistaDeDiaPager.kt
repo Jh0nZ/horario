@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -91,16 +92,22 @@ fun vistaDeDiaPager(
                 5 -> DayOfWeek.SATURDAY
                 else -> DayOfWeek.SUNDAY
             }
-            Row (
+            LazyColumn (
                 modifier = modifier.fillMaxSize()
             ) {
-                horas(horario = vistaBack.horario)
-                pruebasDias(
-                    ancho = 400.dp,
-                    modifier = modifier.fillMaxWidth(),
-                    horario = vistaBack.horario,
-                    dia = dayOfWeek
-                )
+                item {
+                    Row (
+                        modifier = modifier.fillMaxSize()
+                    ) {
+                        horas(horario = vistaBack.horario)
+                        pruebasDias(
+                            ancho = 400.dp,
+                            modifier = modifier.fillMaxWidth(),
+                            horario = vistaBack.horario,
+                            dia = dayOfWeek
+                        )
+                    }
+                }
             }
         }
     }
