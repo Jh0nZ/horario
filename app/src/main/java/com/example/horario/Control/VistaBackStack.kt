@@ -1,8 +1,16 @@
 package com.example.backstack_tests.Control
 
 import android.content.Context
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.horario.Boundary.Carrera
 import com.example.horario.Boundary.Materia
@@ -11,6 +19,7 @@ import com.example.horario.Control.Horario
 import com.example.horario.Control.testHorario
 import com.google.gson.Gson
 
+@OptIn(ExperimentalMaterial3Api::class)
 class VistaBackStack : ViewModel() {
     val stackList = mutableListOf<String>();
     val backStackEnabled = mutableStateOf(false)
@@ -22,6 +31,12 @@ class VistaBackStack : ViewModel() {
     var currentMateria = mutableStateOf("Seleccionar materia")
     var contruirHorario = mutableStateOf(Horario())
     val horario = mutableStateOf(Horario().ejemplo())
+    val materiaSheetState = SheetState(skipPartiallyExpanded = true)
+    val bottomSheetState2 = SheetState(skipPartiallyExpanded = true)
+    val openBottomSheet = mutableStateOf(false)
+    val editar_crear = mutableStateOf("crear")
+    val currentOption = mutableStateOf("")
+    val openSelectMateria = mutableStateOf(false)
 
     fun guardarHorario(context: Context) {
         horario.value = contruirHorario.value

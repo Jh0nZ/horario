@@ -175,8 +175,10 @@ class Carrera(
 }
 
 class Semestre(
-    val nivel: String
-) {
+    val nivel: String,
+    var seleccionado: Boolean = false
+)
+{
     val materias = mutableListOf<Materia>()
     fun insertarMateria(extraerMateria: ExtraerMateria) {
         materias.forEach {
@@ -208,8 +210,10 @@ class Semestre(
 
 class Materia(
     val nombre: String,
-    val codigo: String
-) {
+    val codigo: String,
+    var seleccionado: Boolean = false
+)
+{
     val grupos = mutableListOf<Grupo>()
     fun insertarGrupo(extraerMateria: ExtraerMateria) {
         grupos.forEach {
@@ -236,7 +240,8 @@ class Grupo(
     val extraMateria: String,
     val extraCodMat: String,
     var seleccionado: Boolean = false
-) {
+)
+{
     var intervalos = mutableListOf<Intervalo>()
     fun insertarIntervalo(extraerMateria: ExtraerMateria) {
         intervalos.add(extraerMateria.intervalo!!)
