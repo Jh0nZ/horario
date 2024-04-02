@@ -90,26 +90,6 @@ class Horario(
             listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)
         }
     }
-
-    fun obtenerChoquesDeHorario(dia: DayOfWeek): List<Intervalo> {
-        val choques: MutableList<Intervalo> = mutableListOf()
-        val intervalosDelDia = intervalos.filter { it.dia == dia }
-
-        for (i in 0 until intervalosDelDia.size - 1) {
-            for (j in i + 1 until intervalosDelDia.size) {
-                val intervaloA = intervalosDelDia[i]
-                val intervaloB = intervalosDelDia[j]
-
-                if (seSuperponen(intervaloA, intervaloB)) {
-                    choques.add(intervaloA)
-                    choques.add(intervaloB)
-                }
-            }
-        }
-        val intervalosSinChoques = intervalosDelDia.filter { !choques.contains(it) }
-        val intervaloChoque = IntervaloChoque("Choque", choques)
-        return (intervalosSinChoques + intervaloChoque).sortedBy { it.inicio }
-    }
     
     fun obtenerDiaFormato(dia: DayOfWeek): List<Intervalo> {
         val respuesta: MutableList<Intervalo> = mutableListOf()
@@ -136,9 +116,34 @@ class Horario(
         return respuesta
     }
 
+    fun obtenerDiaFormatoChoque(dia: DayOfWeek): List<Intervalo> {
+        val respuesta: MutableList<Intervalo> = mutableListOf()
+        val invertalosDelDia = generarChoques(dia).sortedBy { it.inicio }
+        var hora_inicial = obtenerMinimo()
+        val auxiliar = obtenerMaximo()
+        for (inverval in invertalosDelDia) {
+            if (hora_inicial != null) {
+                if (hora_inicial == inverval.inicio) {
+                    respuesta.add(inverval)
+                    hora_inicial = inverval.fin
+                } else {
+                    respuesta.add(Intervalo(null, hora_inicial, inverval.inicio, dia))
+                    respuesta.add(inverval)
+                    hora_inicial = inverval.fin
+                }
+            }
+        }
+        auxiliar.sumarMinuto(90)
+        if (hora_inicial != auxiliar) {
+            respuesta.add(Intervalo(null, hora_inicial, auxiliar, dia))
+        }
+
+        return respuesta
+    }
+
     fun obtenerDiaFormato24h(dia: DayOfWeek): List<Intervalo> {
         val respuesta: MutableList<Intervalo> = mutableListOf()
-        val invertalosDelDia = obtenerDia(dia)
+        val invertalosDelDia = generarChoques(dia).sortedBy { it.inicio }
 
         var hora_inicial = Tiempo()
         val auxiliar = Tiempo(24,0)
@@ -178,11 +183,38 @@ class Horario(
         return this
     }
 
-
+    fun generarChoques(dia: DayOfWeek): List<Intervalo> {
+        val respuesta = mutableListOf<Intervalo>()
+        intervalos.filter { it.dia == dia }.forEach { interv ->
+            var insertado = false
+            for (res in respuesta.filter { it.dia == dia }) {
+                if ((interv.inicio > res.inicio && interv.inicio < res.fin) || (interv.fin > res.inicio && interv.fin < res.fin) || (interv.inicio >= res.inicio && interv.fin <= res.fin) ) {
+                    insertado = true
+                    val minimoMenor = if (interv.inicio < res.inicio) interv else res
+                    val maximoMayor = if (interv.fin > res.fin) interv else res
+                    res.inicio = minimoMenor.inicio
+                    res.fin = maximoMayor.fin
+                    interv.nombre?.let { res.listaNombres.add(it) }
+                    res.nombre = "${res.nombre}-${interv.nombre}"
+                    res.esChoque = true
+                    break
+                }
+            }
+            if (!insertado) {
+                val aa = interv.copy()
+                aa.nombre?.let { interv.listaNombres.add(it) }
+                respuesta.add(aa)
+            }
+        }
+        return respuesta.toList()
+    }
 }
 
 fun obtenerHorasString(intervalo: Int, minimo: Tiempo, maximo: Tiempo): List<String> {
     val respuesta: MutableList<String> = mutableListOf()
+
+
+
     var horita: Tiempo = minimo
     while (horita <= maximo) {
         respuesta.add(horita.toString())
@@ -192,13 +224,15 @@ fun obtenerHorasString(intervalo: Int, minimo: Tiempo, maximo: Tiempo): List<Str
 }
 
 open class Intervalo(
-    val nombre: String?,
-    val inicio: Tiempo,
-    val fin: Tiempo,
+    var nombre: String?,
+    var inicio: Tiempo,
+    var fin: Tiempo,
     val dia: DayOfWeek,
     val color: Color = Color.White,
     val aula: String = "",
-    val nro_grupo: String = ""
+    val nro_grupo: String = "",
+    var esChoque: Boolean = false,
+    val listaNombres: MutableList<String> = mutableListOf()
 ) {
     val duracion: Int = diferenciaMinutos(inicio, fin)
 
@@ -215,26 +249,34 @@ open class Intervalo(
     override fun toString(): String {
         return "$nombre, $inicio, $fin, $dia, $duracion"
     }
-}
-class IntervaloChoque(nombre: String?, val choques: List<Intervalo>)
-    : Intervalo(nombre = nombre, inicio = choques.minOf { it.inicio }, fin = choques.maxOf { it.fin }, dia = choques.first().dia) {
 
-    override fun toString(): String {
-        return super.toString()+ ", Intervalos: $choques"
+    fun copy(): Intervalo {
+        return Intervalo(
+            nombre = this.nombre,
+            inicio = this.inicio.copy(), // Copia el objeto Tiempo
+            fin = this.fin.copy(), // Copia el objeto Tiempo
+            dia = this.dia,
+            color = this.color,
+            aula = this.aula,
+            nro_grupo = this.nro_grupo,
+            esChoque = this.esChoque,
+            listaNombres = this.listaNombres.toMutableList() // Copia la lista de nombres
+        )
     }
 }
 
-fun main22() {
-    val int1 = Intervalo(inicio = Tiempo(), fin = Tiempo(5,0), dia = DayOfWeek.TUESDAY, nombre = null)
-    println(int1)
-}
-
-
 fun main() {
-    val horario = Horario().ejemplo()
+    val horario = Horario()
+    horario.agregarIntervalo("algoritmos", Tiempo(6,45), Tiempo(8,15), DayOfWeek.TUESDAY, Color.Blue, "666")
+    horario.agregarIntervalo("graficacion", Tiempo(12,45), Tiempo(14,15), DayOfWeek.TUESDAY, Color.Blue, "666")
+    //horario.agregarIntervalo("materia3", Tiempo(8,0), Tiempo(9,15), DayOfWeek.TUESDAY, Color.Blue, "666")
 
-    println(horario)
-    println(horario)
+    //horario.generarChoques(DayOfWeek.WEDNESDAY).forEach {
+        //println(it)
+    //}
+    horario.obtenerDiaFormatoChoque(DayOfWeek.TUESDAY).forEach {
+        println(it)
+    }
 }
 
 fun testHorario(

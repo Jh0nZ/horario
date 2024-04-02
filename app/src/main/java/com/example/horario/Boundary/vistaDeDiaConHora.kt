@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.backstack_tests.Control.VistaBackStack
@@ -153,6 +154,7 @@ fun horadia24(
 
     val scrollState = rememberLazyListState()
 
+    /*
     LaunchedEffect(minutos) {
         if (!scrolledAutomatically) {
 
@@ -166,6 +168,7 @@ fun horadia24(
             scrolledAutomatically = true
         }
     }
+     */
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -222,7 +225,7 @@ fun horadia24(
                                             .height(invertalo.duracion.dp)
                                             .fillMaxWidth()
                                             .background(
-                                                invertalo.color,
+                                                if (invertalo.esChoque) Color(160, 160, 160, 255) else invertalo.color,
                                                 shape = RoundedCornerShape(10)
                                             ),
                                     ) {
@@ -231,14 +234,15 @@ fun horadia24(
                                                 verticalArrangement = Arrangement.SpaceBetween
                                             ) {
                                                 Text(
-                                                    text = invertalo.nombre,
-                                                    maxLines = 1,
-                                                    color = colorTexto
+                                                    text = invertalo.nombre!!,
+                                                    maxLines = 3,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = if (invertalo.esChoque) Color.Red else colorTexto
                                                 )
                                                 Text(
                                                     text = invertalo.aula,
                                                     maxLines = 1,
-                                                    color = colorTexto
+                                                    color = if (invertalo.esChoque) Color.Red else colorTexto
                                                 )
                                             }
                                         }

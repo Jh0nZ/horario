@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -37,7 +38,11 @@ fun vistaHorarioSemana(
     modifier: Modifier = Modifier,
     vistaBackStack: VistaBackStack = VistaBackStack()
 ) {
-    LazyColumn {
+    LazyColumn (
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Blue)
+    ) {
         item {
             LazyRow {
                 item {
@@ -92,7 +97,6 @@ fun pruebasDias(
     ancho: Dp = 125.dp,
     dia: DayOfWeek = DayOfWeek.FRIDAY
 ) {
-    Log.d("pruebaaa", "recomposicion una vez")
     Column {
         Text(
             text = dia.toString(),
@@ -103,28 +107,28 @@ fun pruebasDias(
                 .height(40.dp)
                 .width(ancho)
         )
-        for (inter in horario.value.obtenerDiaFormato(dia)) {
+        for (inter in horario.value.obtenerDiaFormatoChoque(dia)) {
             if (inter.nombre != null) {
                 val colorTexto = if (CalcularLuminosidad(inter.color) < 0.5) Color.White else Color.Black
                 Column(
                     verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .background(inter.color, shape = RoundedCornerShape(10))
+                        .background(if (inter.esChoque) Color(160, 160, 160, 255) else inter.color, shape = RoundedCornerShape(10))
                         .height(inter.duracion.dp)
                         .width(ancho)
                         .padding(4.dp)
                 ) {
                     Text(
-                        text = inter.nombre,
+                        text = inter.nombre!!,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        color = colorTexto
+                        color = if (inter.esChoque) Color.Red else colorTexto
                     )
                     Text(
                         text = inter.aula,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = colorTexto
+                        color = if (inter.esChoque) Color.Red else colorTexto
                     )
                 }
             } else {

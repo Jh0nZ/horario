@@ -1,7 +1,6 @@
 package com.example.horario
 
 import android.content.Context
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import android.widget.CheckBox
