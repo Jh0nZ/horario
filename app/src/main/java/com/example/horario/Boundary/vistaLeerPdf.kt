@@ -9,21 +9,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.backstack_tests.Control.VistaBackStack
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
@@ -135,6 +131,7 @@ fun main6() {
 }
 
 fun main() {
+    /*
     val nombreArchivo = "C:\\Users\\jhon\\Desktop\\horario_example.txt"
 
     val informatica = Carrera("Ing informatica")
@@ -147,6 +144,15 @@ fun main() {
     informatica.semestres.forEach {
         println(it)
     }
+     */
+    val a = Semestre("A")
+    val g1 = Grupo("grupo1", "materiax", "x")
+    val g3 = Grupo("grupo1", "materiax", "x")
+
+    val g2 = Grupo("grupo2", "materiay", "y")
+
+    println(g1==g3)
+
 }
 
 class Carrera(
@@ -176,7 +182,7 @@ class Carrera(
 
 class Semestre(
     val nivel: String,
-    var seleccionado: Boolean = false
+    val seleccionado: MutableState<Boolean> = mutableStateOf(false)
 )
 {
     val materias = mutableListOf<Materia>()
@@ -211,7 +217,7 @@ class Semestre(
 class Materia(
     val nombre: String,
     val codigo: String,
-    var seleccionado: Boolean = false
+    val seleccionado: MutableState<Boolean> = mutableStateOf(false)
 )
 {
     val grupos = mutableListOf<Grupo>()
@@ -236,20 +242,35 @@ class Materia(
 }
 
 class Grupo(
-    val nombre: String,
-    val extraMateria: String,
-    val extraCodMat: String,
-    var seleccionado: Boolean = false
+    var nombre: String,
+    var extraMateria: String,
+    var extraCodMat: String,
+    val seleccionado: MutableState<Boolean> = mutableStateOf(false)
 )
 {
     var intervalos = mutableListOf<Intervalo>()
     fun insertarIntervalo(extraerMateria: ExtraerMateria) {
         intervalos.add(extraerMateria.intervalo!!)
     }
+    fun copy(): Grupo {
+        val nuevo = Grupo(nombre, extraMateria, extraCodMat, mutableStateOf(false))
+        intervalos.forEach {
+            nuevo.intervalos.add(it.copy())
+        }
+        return nuevo
+    }
     override fun toString(): String {
         val docentesUnicos = intervalos.map { it.docente }.distinct()
         val cadenaDocentes = docentesUnicos.joinToString(separator = ",")
         return "Grupo: $nombre, $cadenaDocentes"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Grupo) return false
+
+        return nombre == other.nombre && extraMateria == other.extraMateria &&
+                extraCodMat == other.extraCodMat
     }
 }
 
@@ -263,6 +284,9 @@ class Intervalo (
     var h_fin: String,
     var tipo: String
 ) {
+    fun copy(): Intervalo {
+        return Intervalo(extraIMateria, extraIGrupo, docente, dia, aula, h_inicio, h_fin, tipo)
+    }
     override fun toString(): String {
         return "docente: $docente, dia: $dia, aula: $aula, h_inicio: $h_inicio, h_fin: $h_fin, tipo: $tipo"
     }

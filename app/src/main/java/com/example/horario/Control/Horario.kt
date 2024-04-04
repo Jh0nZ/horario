@@ -11,13 +11,14 @@ class Horario(
     val saltosTiempo: Int = 90
 ) {
     val intervalos = mutableStateListOf<Intervalo>()
+    val grupos = mutableStateListOf<Grupo>()
 
     fun obtenerMinimo(): Tiempo {
-        return intervalos.minByOrNull{ it.inicio }?.inicio?.copy()?: Tiempo(6, 45)
+        return obtenerIntervalosGrupos().minByOrNull { it.inicio }?.inicio?.copy() ?: Tiempo(6, 45)
     }
 
     fun obtenerMaximo(): Tiempo {
-        return intervalos.maxByOrNull { it.fin }?.fin?.copy() ?: Tiempo(12,45)
+        return obtenerIntervalosGrupos().maxByOrNull { it.fin }?.fin?.copy() ?: Tiempo(12,45)
     }
 
     fun agregarIntervalo(
@@ -35,53 +36,53 @@ class Horario(
     fun agregarGrupo(
         grupo: Grupo
     ) {
-        grupo.intervalos.forEach {
-            val nuevoIntervalo = Intervalo(
-                grupo.extraMateria,
-                Tiempo(it.h_inicio),
-                Tiempo(it.h_fin),
-                text2Day(it.dia),
-                generarColorUnicoParaCodigo(grupo.extraMateria+grupo.nombre),
-                it.aula,
-                it.extraIGrupo
-                /*TODO agregar el tipo (auxiliar)*/
-            )
-            intervalos.add(nuevoIntervalo)
-        }
+        grupos.add(grupo.copy())
     }
-    fun quitarGrupo(grupo: Grupo) {
-        val aremover = mutableListOf<Intervalo>()
-        intervalos.forEach {
-            if (it.nombre == grupo.extraMateria && it.nro_grupo == grupo.nombre) {
-                aremover.add(it)
+
+    fun obtenerIntervalosGrupos(): MutableList<Intervalo> {
+        val respuesta = mutableListOf<Intervalo>()
+        grupos.forEach { grupo ->
+            grupo.intervalos.forEach {
+                val nuevoIntervalo = Intervalo(
+                    grupo.extraMateria,
+                    Tiempo(it.h_inicio),
+                    Tiempo(it.h_fin),
+                    text2Day(it.dia),
+                    generarColorUnicoParaCodigo(grupo.extraMateria+grupo.nombre),
+                    it.aula,
+                    grupo.nombre
+                    /*TODO agregar el tipo (auxiliar)*/
+                )
+                respuesta.add(nuevoIntervalo)
             }
         }
-        aremover.forEach {
-            intervalos.remove(it)
-        }
+        return respuesta
     }
 
-
-    fun text2Day(diaTexto: String): DayOfWeek {
-        return when (diaTexto.uppercase()) {
-            "LU" -> DayOfWeek.MONDAY
-            "MA" -> DayOfWeek.TUESDAY
-            "MI" -> DayOfWeek.WEDNESDAY
-            "JU" -> DayOfWeek.THURSDAY
-            "VI" -> DayOfWeek.FRIDAY
-            "SA" -> DayOfWeek.SATURDAY
-            "DO" -> DayOfWeek.SUNDAY
-            else -> DayOfWeek.SUNDAY // Valor predeterminado si no coincide ninguno
+    fun quitarGrupo(grupo: Grupo) {
+        val copiaGrupos = grupos.toList()
+        copiaGrupos.forEach {
+            if (it == grupo) {
+                grupos.remove(it)
+            }
         }
+        /*
+        val intervalosCopia = intervalos.toList()
+        intervalosCopia.forEach {
+            if (it.nombre == grupo.extraMateria && it.nro_grupo == grupo.nombre) {
+                intervalos.remove(it)
+            }
+        }
+         */
     }
 
     fun obtenerDia(dia: DayOfWeek): List<Intervalo> {
-        return intervalos.filter {it.dia == dia}
+        return obtenerIntervalosGrupos().filter {it.dia == dia}
             .sortedBy { it.inicio }
     }
 
     fun getUsedDays(): List<DayOfWeek> {
-        val diasUtilizados = intervalos.map { it.dia }
+        val diasUtilizados = obtenerIntervalosGrupos().map { it.dia }
             .distinct() // Días únicos
             .sorted()   // Ordenados
 
@@ -186,7 +187,7 @@ class Horario(
 
     fun generarChoques(dia: DayOfWeek): List<Intervalo> {
         val respuesta = mutableListOf<Intervalo>()
-        intervalos.filter { it.dia == dia }.forEach { interv ->
+        obtenerIntervalosGrupos().filter { it.dia == dia }.forEach { interv ->
             var insertado = false
             for (res in respuesta.filter { it.dia == dia }) {
                 if ((interv.inicio > res.inicio && interv.inicio < res.fin) || (interv.fin > res.inicio && interv.fin < res.fin) || (interv.inicio >= res.inicio && interv.fin <= res.fin) ) {
@@ -400,4 +401,42 @@ fun testHorario(
         "691D"
     )
     return horario
+}
+
+
+fun text2Day(diaTexto: String): DayOfWeek {
+    return when (diaTexto.uppercase()) {
+        "LU" -> DayOfWeek.MONDAY
+        "MA" -> DayOfWeek.TUESDAY
+        "MI" -> DayOfWeek.WEDNESDAY
+        "JU" -> DayOfWeek.THURSDAY
+        "VI" -> DayOfWeek.FRIDAY
+        "SA" -> DayOfWeek.SATURDAY
+        "DO" -> DayOfWeek.SUNDAY
+        else -> DayOfWeek.SUNDAY // Valor predeterminado si no coincide ninguno
+    }
+}
+
+fun day2Text(dia: DayOfWeek): String {
+    return when (dia) {
+        DayOfWeek.MONDAY -> "LU"
+        DayOfWeek.TUESDAY -> "MA"
+        DayOfWeek.WEDNESDAY -> "MI"
+        DayOfWeek.THURSDAY -> "JU"
+        DayOfWeek.FRIDAY -> "VI"
+        DayOfWeek.SATURDAY -> "SA"
+        DayOfWeek.SUNDAY -> "DO"
+    }
+}
+
+fun getDaysOfWeek(): List<DayOfWeek> {
+    return listOf(
+        DayOfWeek.MONDAY,
+        DayOfWeek.TUESDAY,
+        DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY,
+        DayOfWeek.FRIDAY,
+        DayOfWeek.SATURDAY,
+        DayOfWeek.SUNDAY
+    )
 }

@@ -13,11 +13,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.horario.Boundary.Carrera
+import com.example.horario.Boundary.Grupo
+import com.example.horario.Boundary.GrupoAdapter
 import com.example.horario.Boundary.Materia
+import com.example.horario.Boundary.MateriaAdapter
 import com.example.horario.Boundary.Semestre
+import com.example.horario.Boundary.SemestreAdapter
 import com.example.horario.Control.Horario
 import com.example.horario.Control.testHorario
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 @OptIn(ExperimentalMaterial3Api::class)
 class VistaBackStack : ViewModel() {
@@ -38,12 +43,29 @@ class VistaBackStack : ViewModel() {
     val currentOption = mutableStateOf("")
     val openSelectMateria = mutableStateOf(false)
 
+
+    var grupoOriginal = Grupo("test", "test", "test", mutableStateOf(false))
+    var grupoTemporalCopiar = Grupo("test", "test", "test", mutableStateOf(false))
+
+    val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(Semestre::class.java, SemestreAdapter())
+        .registerTypeAdapter(Materia::class.java, MateriaAdapter())
+        .registerTypeAdapter(Grupo::class.java, GrupoAdapter())
+        .create()
+
     fun guardarHorario(context: Context) {
         horario.value = contruirHorario.value
         contruirHorario.value = Horario()
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val editor = prefs.edit()
-        val gson = Gson()
+        val horarioJson = gson.toJson(horario.value)
+        editor.putString("horario", horarioJson)
+        editor.apply()
+    }
+
+    fun guardarCambiosEditar(context: Context) {
+        val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
         val horarioJson = gson.toJson(horario.value)
         editor.putString("horario", horarioJson)
         editor.apply()
@@ -51,7 +73,6 @@ class VistaBackStack : ViewModel() {
 
     fun cargarHorario(context: Context) {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
-        val gson = Gson()
         val savedHorario = prefs.getString("horario", null)
         val horrr = gson.fromJson(savedHorario, Horario::class.java)?: Horario()
         horario.value = horrr
@@ -68,16 +89,12 @@ class VistaBackStack : ViewModel() {
     fun guardarCarreraEnPrefs(carrera: Carrera, context: Context) {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val editor = prefs.edit()
-        val gson = Gson()
-
         val carreraJson = gson.toJson(carrera)
         editor.putString("carrera", carreraJson)
         editor.apply()
     }
     fun cargarCarreraDesdePrefs(context: Context): Carrera? {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
-        val gson = Gson() // Necesitarás la dependencia de Gson en tu build.gradle
-
         val carreraJson = prefs.getString("carrera", null)
         return gson.fromJson(carreraJson, Carrera::class.java)
     }

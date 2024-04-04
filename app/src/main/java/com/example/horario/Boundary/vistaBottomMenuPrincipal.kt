@@ -1,43 +1,63 @@
 package com.example.horario.Boundary
 
-import android.util.Log
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.backstack_tests.Control.VistaBackStack
+import com.example.horario.Control.Tiempo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun vistaBottomMenuPrincipal(
-    vistaBack: VistaBackStack
+    context: Context,
+    vistaBack: VistaBackStack,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
 ) {
     ModalBottomSheet(
         //tonalElevation = 0.dp, //color color de scrim oscurecido arriba
@@ -80,149 +100,379 @@ fun vistaBottomMenuPrincipal(
                     }) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = null)
                     }
-                    IconButton(onClick = {
-                        vistaBack.editar_crear.value = if (vistaBack.editar_crear.value == "crear") "editar" else "crear"
-                    }) {
-                        Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = null)
+                    if (vistaBack.editar_crear.value != "editar_grupo") {
+                        IconButton(onClick = {
+                            vistaBack.editar_crear.value = if (vistaBack.editar_crear.value == "crear") "editar" else "crear"
+                        }) {
+                            Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = null)
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            val grupoNuevo = vistaBack.grupoTemporalCopiar
+                            vistaBack.grupoOriginal.intervalos = grupoNuevo.intervalos
+                            vistaBack.grupoOriginal.nombre = grupoNuevo.nombre
+                            vistaBack.grupoOriginal.extraMateria = grupoNuevo.extraMateria
+                            vistaBack.grupoOriginal.extraCodMat = grupoNuevo.extraCodMat
+                            vistaBack.guardarCambiosEditar(context)
+
+                            vistaBack.openBottomSheet.value = false
+
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message ="Guardado exitosamente",
+                                    actionLabel = "Ok",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }) {
+                            Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                        }
                     }
                 }
             }
-            if (vistaBack.editar_crear.value == "crear") {
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(231, 95, 255, 255),
-                        contentColor = Color(29, 29, 29, 255),
-                        disabledContainerColor = Color(243, 173, 255, 255),
-                        disabledContentColor = Color(133, 133, 133, 255)
-                    ),
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        vistaBack.currentOption.value = "semestre"
-                        vistaBack.openSelectMateria.value = true
-                    }
-                ) {
-                    Text(
-                        text = vistaBack.currentSemestre.value,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.widthIn(200.dp)
-                    )
-                }
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(231, 95, 255, 255),
-                        contentColor = Color(29, 29, 29, 255),
-                        disabledContainerColor = Color(243, 173, 255, 255),
-                        disabledContentColor = Color(133, 133, 133, 255)
-                    ),
-                    onClick = {
-                        vistaBack.currentOption.value = "materia"
-                        vistaBack.openSelectMateria.value = true
-                    },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Text(
-                        text = vistaBack.currentMateria.value,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.widthIn(200.dp)
-                    )
-                }
-                LazyColumn (
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp)
-                ) {
-                    val semestre = vistaBack.carrera.getSemestre(vistaBack.currentSemestre.value)
-                    if (semestre != null) {
-                        val materia = semestre.getMateria(vistaBack.currentMateria.value)
-                        if (materia != null) {
-                            item {
-                                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-                            }
-                            items(materia.grupos) {grupo ->
-                                Row (
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
+            when (vistaBack.editar_crear.value) {
+                "crear" -> {
+                    LazyColumn (
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                    ) {
+                        items(vistaBack.carrera.semestres) {semestre ->
+                            Column (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Button(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = grupo.toString(),
-                                        modifier = Modifier
-                                            .width(300.dp)
-                                            .padding(8.dp)
-                                    )
-                                    Checkbox(
-                                        checked = grupo.seleccionado,
-                                        onCheckedChange = {
-                                            Log.d("test", "grupo sel: ${grupo.seleccionado}, check: $it")
-                                            grupo.seleccionado = it
-                                            if (it) {
-                                                vistaBack.contruirHorario.value.agregarGrupo(grupo)
-                                            } else {
-                                                vistaBack.contruirHorario.value.quitarGrupo(grupo)
+                                        .height(40.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(231, 111, 81, 255),
+                                        contentColor = Color.Black
+                                    ),
+                                    shape = RoundedCornerShape(10),
+                                    onClick = {
+                                        if (semestre.seleccionado.value) {
+                                            semestre.seleccionado.value = false
+                                        } else {
+                                            semestre.materias.forEach { mat ->
+                                                mat.seleccionado.value = false
                                             }
-                                            vistaBack.openBottomSheet.value = false
+                                            semestre.seleccionado.value = true
                                         }
-                                    )
-                                }
-                                Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-                            }
-                        }
-                    }
-                }
-            } else {
-                Text(text = "Materias seleccionadas")
-                val gruposSeleccionados = mutableListOf<Grupo>()
-                vistaBack.carrera.semestres.forEach { semestre ->
-                    semestre.materias.forEach { materia ->
-                        materia.grupos.forEach { grupo ->
-                            if (grupo.seleccionado) {
-                                gruposSeleccionados.add(grupo)
-                            }
-                        }
-                    }
-                }
-                LazyColumn {
-                    items(gruposSeleccionados) {grupo ->
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = grupo.extraMateria,
-                                    modifier = Modifier
-                                        .width(300.dp)
-                                )
-                                Text(
-                                    text = grupo.toString(),
-                                    modifier = Modifier
-                                        .width(300.dp)
-                                )
-                            }
-                            Checkbox(
-                                checked = grupo.seleccionado,
-                                onCheckedChange = {
-                                    Log.d("test", "grupo sel: ${grupo.seleccionado}, check: $it")
-                                    grupo.seleccionado = it
-                                    if (it) {
-                                        vistaBack.contruirHorario.value.agregarGrupo(grupo)
-                                    } else {
-                                        vistaBack.contruirHorario.value.quitarGrupo(grupo)
+
                                     }
-                                    vistaBack.openBottomSheet.value = false
+                                ) {
+                                    val icono = if (semestre.seleccionado.value) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown
+                                    Row (
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Text(text = "Semestre ${semestre.nivel}")
+                                        Icon(imageVector = icono, contentDescription = null )
+                                    }
                                 }
+                                if (semestre.seleccionado.value) {
+                                    Column (
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 40.dp)
+                                    ) {
+                                        semestre.materias.sortedBy { it.nombre }.forEach { materia ->
+                                            Column {
+                                                Button(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(40.dp),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = Color(244, 162, 97, 255),
+                                                        contentColor = Color.Black
+                                                    ),
+                                                    shape = RoundedCornerShape(10),
+                                                    onClick = {
+                                                        materia.seleccionado.value = !(materia.seleccionado.value)
+                                                    }
+                                                ) {
+                                                    val icono = if (materia.seleccionado.value) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown
+                                                    Row (
+                                                        modifier = Modifier.fillMaxSize()
+                                                    ) {
+                                                        Text(
+                                                            text = materia.nombre,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis
+                                                        )
+                                                        Icon(imageVector = icono, contentDescription = null )
+                                                    }
+                                                }
+                                                if (materia.seleccionado.value) {
+                                                    Column (
+                                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        materia.grupos.sortedBy { it.nombre }.forEach { grupo ->
+                                                            Button(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(start = 40.dp)
+                                                                    .heightIn(min = 50.dp),
+                                                                colors = ButtonDefaults.buttonColors(
+                                                                    containerColor = if (grupo.seleccionado.value) {
+                                                                        Color(183, 156, 56, 255) // Color cuando está seleccionado
+                                                                    } else {
+                                                                        Color(233, 196, 106, 255) // Color por defecto
+                                                                    },
+                                                                    contentColor = Color.Black
+                                                                ),
+                                                                shape = RoundedCornerShape(10),
+                                                                onClick = {
+                                                                    if (grupo.seleccionado.value) {
+                                                                        grupo.seleccionado.value = false
+                                                                        vistaBack.contruirHorario.value.quitarGrupo(grupo)
+                                                                    } else {
+                                                                        grupo.seleccionado.value = true
+                                                                        vistaBack.contruirHorario.value.agregarGrupo(grupo)
+                                                                    }
+                                                                }
+                                                            ) {
+                                                                val icono = if (grupo.seleccionado.value) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank
+                                                                Row (
+                                                                    modifier = Modifier.fillMaxSize()
+                                                                ) {
+                                                                    Box (
+                                                                        modifier = Modifier.weight(9f)
+                                                                    ) {
+                                                                        Text(
+                                                                            text = grupo.toString(),
+                                                                            overflow = TextOverflow.Ellipsis,
+                                                                            modifier = Modifier.fillMaxSize()
+                                                                        )
+                                                                    }
+                                                                    Box (
+                                                                        modifier = Modifier.weight(1f)
+                                                                    ) {
+                                                                        Icon(imageVector = icono, contentDescription = null )
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                "editar" -> {
+                    Text(text = "Materias seleccionadas")
+                    val gruposSeleccionados = mutableListOf<Grupo>()
+                    vistaBack.carrera.semestres.forEach { semestre ->
+                        semestre.materias.forEach { materia ->
+                            materia.grupos.forEach { grupo ->
+                                if (grupo.seleccionado.value) {
+                                    gruposSeleccionados.add(grupo)
+                                }
+                            }
+                        }
+                    }
+                    LazyColumn {
+                        items(gruposSeleccionados) { grupo ->
+                            val icono =
+                                if (grupo.seleccionado.value) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank
+                            Button(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (grupo.seleccionado.value) {
+                                        Color(183, 156, 56, 255) // Color cuando está seleccionado
+                                    } else {
+                                        Color(233, 196, 106, 255) // Color por defecto
+                                    },
+                                    contentColor = Color.Black
+                                ),
+                                shape = RectangleShape,
+                                onClick = {
+                                    if (grupo.seleccionado.value) {
+                                        grupo.seleccionado.value = false
+                                        vistaBack.contruirHorario.value.quitarGrupo(grupo)
+                                    } else {
+                                        grupo.seleccionado.value = true
+                                        vistaBack.contruirHorario.value.agregarGrupo(grupo)
+
+                                    }
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(9f)
+                                            .fillMaxHeight()
+                                    ) {
+                                        Text(
+                                            text = grupo.extraMateria,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = grupo.toString(),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(imageVector = icono, contentDescription = null)
+                                    }
+                                }
+                            }
+                            Divider(
+                                color = Color.Gray,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        Divider(color = Color.Gray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                    }
+                }
+                "editar_grupo" -> {
+                    val grupito = vistaBack.grupoTemporalCopiar
+                    val nombre_materia = remember {
+                        mutableStateOf(grupito.extraMateria)
+                    }
+                    val nombre_grupo = remember {
+                        mutableStateOf(grupito.nombre)
+                    }
+                    LazyColumn (
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = "Nombre de materia: ")
+                                TextField(
+                                    value = nombre_materia.value, onValueChange = {
+                                        nombre_materia.value = it
+                                        grupito.extraMateria = it
+                                    }
+                                )
+                            }
+                        }
+                        item {
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = "Nombre de grupo: ")
+                                TextField(
+                                    value = nombre_grupo.value, onValueChange = {
+                                        nombre_grupo.value = it
+                                        grupito.nombre = it
+                                    }
+                                )
+                            }
+                        }
+                        item {
+                            Text(text = "intervalos: ")
+                        }
+                        items(grupito.intervalos) {
+                            val docente = remember {
+                                mutableStateOf(it.docente)
+                            }
+                            val dia = remember {
+                                mutableStateOf(it.dia)
+                            }
+
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                var aula by remember {
+                                    mutableStateOf(it.aula)
+                                }
+                                TextField(
+                                    value = aula,
+                                    onValueChange = {newText ->
+                                        it.aula = newText
+                                        aula = newText
+                                    },
+                                    placeholder = {
+                                        Text(text = "aula")
+                                    },
+                                    label = {
+                                        Text(text = "aula")
+                                    }
+                                )
+                            }
+
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                val tiempo = Tiempo(it.h_inicio)
+                                val tiempoTexto = remember {
+                                    mutableStateOf(tiempo.toString())
+                                }
+                                Text(text = "Hora inicio: ")
+                                horaPicker(context, tiempo.hora, tiempo.minuto, tiempoTexto.value) { _, h, m ->
+                                    tiempo.hora = h
+                                    tiempo.minuto = m
+                                    it.h_inicio = String.format("%d%02d", h, m)
+                                    tiempoTexto.value = tiempo.toString()
+                                }
+                            }
+
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                val tiempo = Tiempo(it.h_fin)
+                                val tiempoTexto = remember {
+                                    mutableStateOf(tiempo.toString())
+                                }
+                                Text(text = "Hora fin: ")
+                                horaPicker(context, tiempo.hora, tiempo.minuto, tiempoTexto.value) { _, h, m ->
+                                    tiempo.hora = h
+                                    tiempo.minuto = m
+                                    it.h_fin = String.format("%d%02d", h, m)
+                                    tiempoTexto.value = tiempo.toString()
+                                }
+                            }
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = "Nombre docente: ")
+                                TextField(
+                                    value = docente.value, onValueChange = {newText ->
+                                        docente.value = newText
+                                        it.docente = newText
+                                    }
+                                )
+                            }
+                            Row (
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = "Dia: ")
+                                vistaSeleccionarDia(dia, it)
+                            }
+                            Divider()
+                        }
                     }
                 }
             }
+
         }
     }
 }

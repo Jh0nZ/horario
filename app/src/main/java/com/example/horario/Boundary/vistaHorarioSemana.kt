@@ -116,7 +116,8 @@ fun pruebasDias(
             )
         }
 
-        for (inter in horario.value.obtenerDiaFormatoChoque(dia)) {
+        val delDia = horario.value.obtenerDiaFormatoChoque(dia)
+        for (inter in delDia) {
             if (inter.nombre != null) {
                 val colorTexto = if (CalcularLuminosidad(inter.color) < 0.5) Color.White else Color.Black
                 Column(

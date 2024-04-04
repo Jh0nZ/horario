@@ -283,6 +283,7 @@ fun aaa(
                         onClick = {
                             Log.d("back", "el stack esta asi: $vistaBack")
                             vistaBack.openBottomSheet.value = true
+                            vistaBack.editar_crear.value = "crear"
                         }
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
@@ -339,7 +340,7 @@ fun aaa(
     }
 
     if (vistaBack.openBottomSheet.value) {
-        vistaBottomMenuPrincipal(vistaBack = vistaBack)
+        vistaBottomMenuPrincipal(context = context, vistaBack = vistaBack, snackbarHostState, scope)
     }
 
     if (vistaBack.openSelectMateria.value) {
