@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -352,18 +354,22 @@ fun vistaBottomMenuPrincipal(
                         mutableStateOf(grupito.nombre)
                     }
                     LazyColumn (
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     ) {
                         item {
                             Row (
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(text = "Nombre de materia: ")
                                 TextField(
                                     value = nombre_materia.value, onValueChange = {
                                         nombre_materia.value = it
                                         grupito.extraMateria = it
+                                    },
+                                    label = {
+                                        Text(text = "Materia")
                                     }
                                 )
                             }
@@ -373,11 +379,14 @@ fun vistaBottomMenuPrincipal(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(text = "Nombre de grupo: ")
+
                                 TextField(
                                     value = nombre_grupo.value, onValueChange = {
                                         nombre_grupo.value = it
                                         grupito.nombre = it
+                                    },
+                                    label = {
+                                        Text(text = "Grupo")
                                     }
                                 )
                             }
@@ -392,79 +401,72 @@ fun vistaBottomMenuPrincipal(
                             val dia = remember {
                                 mutableStateOf(it.dia)
                             }
+                            var aula by remember {
+                                mutableStateOf(it.aula)
+                            }
 
                             Row (
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
                             ) {
-                                var aula by remember {
-                                    mutableStateOf(it.aula)
-                                }
+
+                                TextField(
+                                    value = docente.value, onValueChange = {newText ->
+                                        docente.value = newText
+                                        it.docente = newText
+                                    },
+                                    label = {
+                                        Text(text = "Docente")
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 TextField(
                                     value = aula,
                                     onValueChange = {newText ->
                                         it.aula = newText
                                         aula = newText
                                     },
-                                    placeholder = {
-                                        Text(text = "aula")
-                                    },
                                     label = {
-                                        Text(text = "aula")
+                                        Text(text = "Aula")
                                     }
                                 )
                             }
 
                             Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround,
+                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
                             ) {
-                                val tiempo = Tiempo(it.h_inicio)
-                                val tiempoTexto = remember {
-                                    mutableStateOf(tiempo.toString())
+                                val tiempo_inicio = Tiempo(it.h_inicio)
+                                val tiempoTexto_inicio = remember {
+                                    mutableStateOf(tiempo_inicio.toString())
+                                }
+
+                                val tiempo_fin = Tiempo(it.h_fin)
+                                val tiempoTexto_fin = remember {
+                                    mutableStateOf(tiempo_fin.toString())
                                 }
                                 Text(text = "Hora inicio: ")
-                                horaPicker(context, tiempo.hora, tiempo.minuto, tiempoTexto.value) { _, h, m ->
-                                    tiempo.hora = h
-                                    tiempo.minuto = m
+                                horaPicker(context, tiempo_inicio.hora, tiempo_inicio.minuto, tiempoTexto_inicio.value) { _, h, m ->
+                                    tiempo_inicio.hora = h
+                                    tiempo_inicio.minuto = m
+                                    it.h_fin = String.format("%d%02d", h, m)
+                                    tiempoTexto_inicio.value = tiempo_inicio.toString()
+                                }
+
+                                Text(text = "Hora fin: ")
+                                horaPicker(context, tiempo_fin.hora, tiempo_fin.minuto, tiempoTexto_fin.value) { _, h, m ->
+                                    tiempo_fin.hora = h
+                                    tiempo_fin.minuto = m
                                     it.h_inicio = String.format("%d%02d", h, m)
-                                    tiempoTexto.value = tiempo.toString()
+                                    tiempoTexto_fin.value = tiempo_fin.toString()
                                 }
                             }
 
                             Row (
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
                             ) {
-                                val tiempo = Tiempo(it.h_fin)
-                                val tiempoTexto = remember {
-                                    mutableStateOf(tiempo.toString())
-                                }
-                                Text(text = "Hora fin: ")
-                                horaPicker(context, tiempo.hora, tiempo.minuto, tiempoTexto.value) { _, h, m ->
-                                    tiempo.hora = h
-                                    tiempo.minuto = m
-                                    it.h_fin = String.format("%d%02d", h, m)
-                                    tiempoTexto.value = tiempo.toString()
-                                }
-                            }
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = "Nombre docente: ")
-                                TextField(
-                                    value = docente.value, onValueChange = {newText ->
-                                        docente.value = newText
-                                        it.docente = newText
-                                    }
-                                )
-                            }
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = "Dia: ")
                                 vistaSeleccionarDia(dia, it)
                             }
                             Divider()
