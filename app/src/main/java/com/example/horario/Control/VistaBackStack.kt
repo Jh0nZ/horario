@@ -43,6 +43,8 @@ class VistaBackStack : ViewModel() {
     val currentOption = mutableStateOf("")
     val openSelectMateria = mutableStateOf(false)
 
+    var grupoElimiar: Grupo? = null
+
 
     var grupoOriginal = Grupo("test", "test", "test", mutableStateOf(false))
     var grupoTemporalCopiar = Grupo("test", "test", "test", mutableStateOf(false))

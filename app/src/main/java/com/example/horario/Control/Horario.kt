@@ -48,7 +48,7 @@ class Horario(
                     Tiempo(it.h_inicio),
                     Tiempo(it.h_fin),
                     text2Day(it.dia),
-                    generarColorUnicoParaCodigo(grupo.extraMateria+grupo.nombre),
+                    generarColorUnicoParaCodigo("${grupo.extraCodMat}${grupo.extraMateria}${grupo.nombre}"),
                     it.aula,
                     grupo.nombre
                     /*TODO agregar el tipo (auxiliar)*/
@@ -426,6 +426,30 @@ fun day2Text(dia: DayOfWeek): String {
         DayOfWeek.FRIDAY -> "VI"
         DayOfWeek.SATURDAY -> "SA"
         DayOfWeek.SUNDAY -> "DO"
+    }
+}
+
+fun spanish2day(dia: String): DayOfWeek {
+    return when(dia) {
+        "Lunes" -> DayOfWeek.MONDAY
+        "Martes" -> DayOfWeek.TUESDAY
+        "Miercoles" -> DayOfWeek.WEDNESDAY
+        "Jueves" -> DayOfWeek.THURSDAY
+        "Viernes" -> DayOfWeek.FRIDAY
+        "Sabado" -> DayOfWeek.SATURDAY
+        else -> DayOfWeek.SUNDAY
+    }
+}
+
+fun day2Spanish(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "Lunes"
+        DayOfWeek.TUESDAY -> "Martes"
+        DayOfWeek.WEDNESDAY -> "Miercoles"
+        DayOfWeek.THURSDAY -> "Jueves"
+        DayOfWeek.FRIDAY -> "Viernes"
+        DayOfWeek.SATURDAY -> "Sabado"
+        DayOfWeek.SUNDAY -> "Domingo"
     }
 }
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -19,45 +20,42 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.horario.Control.Tiempo
 import com.example.horario.Control.day2Text
 import com.example.horario.Control.getDaysOfWeek
 import java.time.DayOfWeek
 
 @Composable
 fun vistaSeleccionarDia(
-    dia: MutableState<String> = mutableStateOf("LU"),
-    intervalo: Intervalo) {
+    diaActual: DayOfWeek,
+    cambiarDia: (DayOfWeek) -> Unit
+) {
     Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
     ){
         getDaysOfWeek().forEach {
-            botonDia(it, dia, intervalo)
+            botonDia(it, diaActual, cambiarDia)
         }
     }
 }
 
 @Composable
 fun botonDia(
-    dayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
-    dia: MutableState<String> = mutableStateOf("LU"),
-    intervalo: Intervalo,
+    dayOfWeek: DayOfWeek,
+    diaActual: DayOfWeek,
+    cambiarDia: (DayOfWeek) -> Unit,
 ) {
     Button(
-        onClick = {
-            dia.value = day2Text(dayOfWeek)
-            intervalo.dia = dia.value
-        },
-        modifier= Modifier.size(50.dp),  //avoid the oval shape
+        onClick = { cambiarDia(dayOfWeek) },
+        modifier= Modifier.size(45.dp),  //avoid the oval shape
         shape = CircleShape,
-        border= BorderStroke(2.dp, Color(243, 133, 255, 255)),
+        border = BorderStroke(1.dp, if (diaActual == dayOfWeek) Color(243, 133, 255, 255) else Color(196, 196, 196, 255)),
         contentPadding = PaddingValues(0.dp),  //avoid the little icon
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (dia.value == day2Text(dayOfWeek)) Color(243, 133, 255, 255) else Color(228, 228, 228, 255),
-            contentColor = Color.Black
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (diaActual == dayOfWeek) Color(243, 133, 255, 255) else Color.Transparent,
+            contentColor = if (diaActual == dayOfWeek) Color.Black else Color(196, 196, 196, 255)
         )
     ) {
         Text(text = day2SpanishLetter(dayOfWeek))

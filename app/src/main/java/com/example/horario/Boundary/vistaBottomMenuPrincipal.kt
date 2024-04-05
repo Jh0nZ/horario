@@ -1,18 +1,23 @@
 package com.example.horario.Boundary
 
+import android.app.TimePickerDialog
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +29,13 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Class
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Room
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -34,7 +46,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +55,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.backstack_tests.Control.VistaBackStack
 import com.example.horario.Control.Tiempo
+import com.example.horario.Control.day2Text
+import com.example.horario.Control.spanish2day
+import com.example.horario.Control.text2Day
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -62,9 +78,9 @@ fun vistaBottomMenuPrincipal(
     scope: CoroutineScope
 ) {
     ModalBottomSheet(
-        //tonalElevation = 0.dp, //color color de scrim oscurecido arriba
-        contentColor = Color(19,19,19),
-        containerColor = Color(255, 235, 178, 255),
+        //tonalElevation = 0.dp, //color color de scrim oscurecido arriba 222831
+        contentColor = Color(231, 231, 231, 255),
+        containerColor = Color(34, 40, 49, 255),
         sheetState = vistaBack.bottomSheetState2,
         scrimColor = Color.Transparent,
         //windowInsets = BottomSheetDefaults.windowInsets, //espacio arriba
@@ -90,7 +106,7 @@ fun vistaBottomMenuPrincipal(
                         text = "Seleccionar grupo",
                         textAlign = TextAlign.Center,
                         fontSize = 22.sp,
-                        color = Color(29, 29, 29, 255)
+                        color = Color(231, 231, 231, 255)
                     )
                 }
                 Row (
@@ -135,25 +151,34 @@ fun vistaBottomMenuPrincipal(
             when (vistaBack.editar_crear.value) {
                 "crear" -> {
                     LazyColumn (
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(8.dp)
+                            .padding(16.dp)
                     ) {
                         items(vistaBack.carrera.semestres) {semestre ->
                             Column (
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .background(
+                                        color = Color(49, 54, 63, 255),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(196, 196, 196, 255),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
                             ) {
                                 Button(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(40.dp),
+                                        .fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(231, 111, 81, 255),
-                                        contentColor = Color.Black
+                                        containerColor = Color.Transparent,
+                                        contentColor = Color(196, 196, 196, 255),
                                     ),
-                                    shape = RoundedCornerShape(10),
+                                    contentPadding = PaddingValues(0.dp),
+                                    shape = RectangleShape,
                                     onClick = {
                                         if (semestre.seleccionado.value) {
                                             semestre.seleccionado.value = false
@@ -170,7 +195,9 @@ fun vistaBottomMenuPrincipal(
                                     Row (
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 8.dp)
                                     ) {
                                         Text(text = "Semestre ${semestre.nivel}")
                                         Icon(imageVector = icono, contentDescription = null )
@@ -181,55 +208,88 @@ fun vistaBottomMenuPrincipal(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(start = 40.dp)
+                                            .padding(
+                                                start = 30.dp,
+                                                end = 8.dp,
+                                                top = 8.dp,
+                                                bottom = 8.dp
+                                            )
                                     ) {
                                         semestre.materias.sortedBy { it.nombre }.forEach { materia ->
-                                            Column {
+                                            Column (
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(
+                                                        color = Color(34, 40, 49, 255),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    )
+                                                    .border(
+                                                        width = 1.dp,
+                                                        color = Color(196, 196, 196, 255),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    )
+                                            ) {
                                                 Button(
                                                     modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(40.dp),
+                                                        .fillMaxWidth(),
                                                     colors = ButtonDefaults.buttonColors(
-                                                        containerColor = Color(244, 162, 97, 255),
-                                                        contentColor = Color.Black
+                                                        containerColor = Color.Transparent,
+                                                        contentColor = Color(196, 196, 196, 255)
                                                     ),
-                                                    shape = RoundedCornerShape(10),
+                                                    contentPadding = PaddingValues(0.dp),
+                                                    shape = RectangleShape,
                                                     onClick = {
                                                         materia.seleccionado.value = !(materia.seleccionado.value)
                                                     }
                                                 ) {
                                                     val icono = if (materia.seleccionado.value) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown
                                                     Row (
-                                                        modifier = Modifier.fillMaxSize()
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        modifier = Modifier
+                                                            .fillMaxSize()
+                                                            .padding(horizontal = 8.dp)
                                                     ) {
-                                                        Text(
-                                                            text = materia.nombre,
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis
-                                                        )
-                                                        Icon(imageVector = icono, contentDescription = null )
+                                                        Box (
+                                                            modifier = Modifier.weight(10f)
+                                                        ) {
+                                                            Text(
+                                                                text = materia.nombre,
+                                                                maxLines = 3,
+                                                                overflow = TextOverflow.Ellipsis
+                                                            )
+                                                        }
+                                                        Box (
+                                                            modifier = Modifier.weight(1f)
+                                                        ) {
+                                                            Icon(imageVector = icono, contentDescription = null )
+                                                        }
                                                     }
                                                 }
                                                 if (materia.seleccionado.value) {
                                                     Column (
                                                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                                                        modifier = Modifier.fillMaxWidth()
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(
+                                                                start = 30.dp,
+                                                                end = 8.dp,
+                                                                top = 8.dp,
+                                                                bottom = 8.dp
+                                                            )
                                                     ) {
                                                         materia.grupos.sortedBy { it.nombre }.forEach { grupo ->
                                                             Button(
                                                                 modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(start = 40.dp)
                                                                     .heightIn(min = 50.dp),
                                                                 colors = ButtonDefaults.buttonColors(
-                                                                    containerColor = if (grupo.seleccionado.value) {
-                                                                        Color(183, 156, 56, 255) // Color cuando está seleccionado
-                                                                    } else {
-                                                                        Color(233, 196, 106, 255) // Color por defecto
-                                                                    },
-                                                                    contentColor = Color.Black
+                                                                    containerColor = Color(49, 54, 63, 255),
+                                                                    contentColor = Color(196, 196, 196, 255)
                                                                 ),
                                                                 shape = RoundedCornerShape(10),
+                                                                contentPadding = PaddingValues(0.dp),
+                                                                border = BorderStroke(1.dp, Color(196, 196, 196, 255)),
                                                                 onClick = {
                                                                     if (grupo.seleccionado.value) {
                                                                         grupo.seleccionado.value = false
@@ -242,10 +302,12 @@ fun vistaBottomMenuPrincipal(
                                                             ) {
                                                                 val icono = if (grupo.seleccionado.value) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank
                                                                 Row (
-                                                                    modifier = Modifier.fillMaxSize()
+                                                                    verticalAlignment = Alignment.CenterVertically,
+                                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
                                                                 ) {
                                                                     Box (
-                                                                        modifier = Modifier.weight(9f)
+                                                                        modifier = Modifier.weight(10f)
                                                                     ) {
                                                                         Text(
                                                                             text = grupo.toString(),
@@ -272,7 +334,6 @@ fun vistaBottomMenuPrincipal(
                     }
                 }
                 "editar" -> {
-                    Text(text = "Materias seleccionadas")
                     val gruposSeleccionados = mutableListOf<Grupo>()
                     vistaBack.carrera.semestres.forEach { semestre ->
                         semestre.materias.forEach { materia ->
@@ -283,23 +344,24 @@ fun vistaBottomMenuPrincipal(
                             }
                         }
                     }
-                    LazyColumn {
+                    LazyColumn (
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
                         items(gruposSeleccionados) { grupo ->
-                            val icono =
-                                if (grupo.seleccionado.value) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank
+                            val icono = if (grupo.seleccionado.value) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank
                             Button(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(80.dp),
+                                    .fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (grupo.seleccionado.value) {
-                                        Color(183, 156, 56, 255) // Color cuando está seleccionado
-                                    } else {
-                                        Color(233, 196, 106, 255) // Color por defecto
-                                    },
-                                    contentColor = Color.Black
+                                    containerColor = Color(34, 40, 49, 255),
+                                    contentColor = Color(196, 196, 196, 255)
                                 ),
-                                shape = RectangleShape,
+                                border = BorderStroke(1.dp, Color(196, 196, 196, 255)),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 onClick = {
                                     if (grupo.seleccionado.value) {
                                         grupo.seleccionado.value = false
@@ -307,21 +369,23 @@ fun vistaBottomMenuPrincipal(
                                     } else {
                                         grupo.seleccionado.value = true
                                         vistaBack.contruirHorario.value.agregarGrupo(grupo)
-
                                     }
                                 }
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxSize()
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxSize().padding(8.dp)
                                 ) {
                                     Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier
                                             .weight(9f)
                                             .fillMaxHeight()
                                     ) {
                                         Text(
                                             text = grupo.extraMateria,
-                                            maxLines = 1,
+                                            maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         Text(
@@ -337,139 +401,209 @@ fun vistaBottomMenuPrincipal(
                                     }
                                 }
                             }
-                            Divider(
-                                color = Color.Gray,
-                                thickness = 1.dp,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
                         }
                     }
                 }
                 "editar_grupo" -> {
+                    val localFocusManager = LocalFocusManager.current
                     val grupito = vistaBack.grupoTemporalCopiar
-                    val nombre_materia = remember {
+                    var nombre_materia by remember {
                         mutableStateOf(grupito.extraMateria)
                     }
-                    val nombre_grupo = remember {
+                    var nombre_grupo by remember {
                         mutableStateOf(grupito.nombre)
                     }
                     LazyColumn (
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .padding(8.dp)
+                            .pointerInput(Unit) {
+                                detectTapGestures(onTap = {
+                                    localFocusManager.clearFocus()
+                                })
+                            }
                     ) {
                         item {
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                TextField(
-                                    value = nombre_materia.value, onValueChange = {
-                                        nombre_materia.value = it
-                                        grupito.extraMateria = it
-                                    },
-                                    label = {
-                                        Text(text = "Materia")
-                                    }
-                                )
-                            }
+                            campoDeTexto(
+                                label = "Materia",
+                                texto = nombre_materia,
+                                limite = 100,
+                                singleLine = false,
+                                leadIcon = {
+                                    Icon(imageVector = Icons.Outlined.Class, contentDescription = null)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                cambiarValor = { newText ->
+                                    nombre_materia = newText
+                                    grupito.extraMateria = newText
+                                }
+                            )
                         }
                         item {
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-
-                                TextField(
-                                    value = nombre_grupo.value, onValueChange = {
-                                        nombre_grupo.value = it
-                                        grupito.nombre = it
-                                    },
-                                    label = {
-                                        Text(text = "Grupo")
-                                    }
-                                )
-                            }
+                            campoDeTexto(
+                                label = "Grupo",
+                                texto = nombre_grupo,
+                                limite = 10,
+                                leadIcon = {
+                                    Icon(imageVector = Icons.Outlined.Group, contentDescription = null)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                cambiarValor = { newText ->
+                                    nombre_grupo = newText
+                                    grupito.nombre = newText
+                                }
+                            )
                         }
-                        item {
-                            Text(text = "intervalos: ")
-                        }
-                        items(grupito.intervalos) {
-                            val docente = remember {
+                        items(grupito.intervalos.sortedBy { text2Day(it.dia) }) {
+                            var docente by remember {
                                 mutableStateOf(it.docente)
                             }
-                            val dia = remember {
-                                mutableStateOf(it.dia)
+                            var dia by remember {
+                                mutableStateOf(day2Spanish(text2Day(it.dia)))
                             }
                             var aula by remember {
                                 mutableStateOf(it.aula)
                             }
-
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
+                            val tiempoInicio = Tiempo(it.h_inicio)
+                            val tiempoFin = Tiempo(it.h_fin)
+                            var textoInicio by remember { mutableStateOf(tiempoInicio.toString()) }
+                            var textoFin by remember { mutableStateOf(tiempoFin.toString()) }
+                            var intervaloExpandido by remember {
+                                mutableStateOf(false)
+                            }
+                            Column (
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .background(
+                                        color = Color(49, 54, 63, 255),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(196, 196, 196, 255),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
                             ) {
-
-                                TextField(
-                                    value = docente.value, onValueChange = {newText ->
-                                        docente.value = newText
-                                        it.docente = newText
-                                    },
-                                    label = {
-                                        Text(text = "Docente")
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                        contentColor = Color(231, 231, 231, 255)
+                                    ),
+                                    shape = RectangleShape,
+                                    onClick = {
+                                        intervaloExpandido = !intervaloExpandido
                                     }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                TextField(
-                                    value = aula,
-                                    onValueChange = {newText ->
-                                        it.aula = newText
-                                        aula = newText
-                                    },
-                                    label = {
-                                        Text(text = "Aula")
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "$dia, $textoInicio hasta $textoFin",
+                                            color = Color(196, 196, 196, 255),
+                                        )
+                                        Icon(
+                                            imageVector = if (intervaloExpandido) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
+                                            contentDescription = null
+                                        )
                                     }
-                                )
+                                }
+                                if (intervaloExpandido) {
+                                    campoDeTexto(
+                                        label = "Docente",
+                                        texto = docente,
+                                        limite = 50,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        singleLine = false,
+                                        leadIcon = {
+                                            Icon(imageVector = Icons.Outlined.Person, contentDescription = null)
+                                        },
+                                        cambiarValor = { newText ->
+                                            docente = newText
+                                            it.docente = newText
+                                        }
+                                    )
+                                    campoDeTexto(
+                                        label = "Aula",
+                                        texto = aula,
+                                        limite = 20,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        leadIcon = {
+                                            Icon(imageVector = Icons.Outlined.Room, contentDescription = null)
+                                        },
+                                        cambiarValor = { newText ->
+                                            aula = newText
+                                            it.aula = newText
+                                        }
+                                    )
+                                    Row (
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        val timepickerdialogInicio = TimePickerDialog(
+                                            context,
+                                            { _, h, m ->
+                                                it.h_inicio = String.format("%d%02d", h, m)
+                                                textoInicio = String.format("%02d:%02d", h, m)
+                                            },
+                                            tiempoInicio.hora,
+                                            tiempoInicio.minuto,
+                                            true
+                                        )
+                                        campoDeTexto(
+                                            label = "Inicio",
+                                            texto = textoInicio,
+                                            limite = 20,
+                                            modifier = Modifier.weight(1f),
+                                            readOnly = true,
+                                            leadIcon = {
+                                                IconButton(onClick = {
+                                                    timepickerdialogInicio.show()
+                                                }) {
+                                                    Icon(imageVector = Icons.Outlined.AccessTime, contentDescription = null)
+                                                }
+
+                                            },
+                                            cambiarValor = {}
+                                        )
+
+                                        val timepickerdialogFin = TimePickerDialog(
+                                            context,
+                                            { _, h, m ->
+                                                it.h_fin = String.format("%d%02d", h, m)
+                                                textoFin = String.format("%02d:%02d", h, m)
+                                            },
+                                            tiempoFin.hora,
+                                            tiempoFin.minuto,
+                                            true
+                                        )
+                                        campoDeTexto(
+                                            label = "Fin",
+                                            texto = textoFin,
+                                            limite = 20,
+                                            modifier = Modifier.weight(1f),
+                                            readOnly = true,
+                                            leadIcon = {
+                                                IconButton(onClick = {
+                                                    timepickerdialogFin.show()
+                                                }) {
+                                                    Icon(imageVector = Icons.Outlined.AccessTime, contentDescription = null)
+                                                }
+                                            },
+                                            cambiarValor = {}
+                                        )
+                                    }
+                                    vistaSeleccionarDia(spanish2day(dia)) { day ->
+                                        dia = day2Spanish(day)
+                                        it.dia = day2Text(day)
+                                    }
+                                }
                             }
-
-                            Row (
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceAround,
-                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-                            ) {
-                                val tiempo_inicio = Tiempo(it.h_inicio)
-                                val tiempoTexto_inicio = remember {
-                                    mutableStateOf(tiempo_inicio.toString())
-                                }
-
-                                val tiempo_fin = Tiempo(it.h_fin)
-                                val tiempoTexto_fin = remember {
-                                    mutableStateOf(tiempo_fin.toString())
-                                }
-                                Text(text = "Hora inicio: ")
-                                horaPicker(context, tiempo_inicio.hora, tiempo_inicio.minuto, tiempoTexto_inicio.value) { _, h, m ->
-                                    tiempo_inicio.hora = h
-                                    tiempo_inicio.minuto = m
-                                    it.h_fin = String.format("%d%02d", h, m)
-                                    tiempoTexto_inicio.value = tiempo_inicio.toString()
-                                }
-
-                                Text(text = "Hora fin: ")
-                                horaPicker(context, tiempo_fin.hora, tiempo_fin.minuto, tiempoTexto_fin.value) { _, h, m ->
-                                    tiempo_fin.hora = h
-                                    tiempo_fin.minuto = m
-                                    it.h_inicio = String.format("%d%02d", h, m)
-                                    tiempoTexto_fin.value = tiempo_fin.toString()
-                                }
-                            }
-
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-                            ) {
-                                vistaSeleccionarDia(dia, it)
-                            }
-                            Divider()
                         }
                     }
                 }

@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,6 +62,7 @@ import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import com.example.backstack_tests.Control.VistaBackStack
 import com.example.horario.Boundary.VistaAjustes
+import com.example.horario.Boundary.testtt
 import com.example.horario.Boundary.vistaBottomMenuPrincipal
 import com.example.horario.Boundary.vistaBottomMenuSecundario
 import com.example.horario.Boundary.vistaCrearHorario
@@ -83,10 +85,11 @@ class MainActivity : ComponentActivity() {
         PDFBoxResourceLoader.init(this);
         window.statusBarColor = Color(0,0,0,0).toArgb()
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
+        LocalFocusManager
         setContent {
             WindowCompat.getInsetsController(window, LocalView.current).isAppearanceLightStatusBars = true
             aaa(vistaBack, this)
+            //testtt()
         }
     }
 }
@@ -260,6 +263,16 @@ fun aaa(
                         if (vistaBack.currentLocation.value == "crear horario") {
                             Button(onClick = {
                                 vistaBack.guardarHorario(context)
+                                vistaBack.carrera.semestres.forEach { semestre ->
+                                    semestre.seleccionado.value = false
+                                    semestre.materias.forEach { materia ->
+                                        materia.seleccionado.value = false
+                                        materia.grupos.forEach { grupo ->
+                                            grupo.seleccionado.value = false
+                                        }
+                                    }
+                                }
+
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
                                         message ="Guardado exitosamente",

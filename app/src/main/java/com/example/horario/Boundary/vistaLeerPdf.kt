@@ -248,6 +248,7 @@ class Grupo(
     val seleccionado: MutableState<Boolean> = mutableStateOf(false)
 )
 {
+    val color = generarColorUnicoParaCodigo("$extraCodMat$extraMateria$nombre")
     var intervalos = mutableListOf<Intervalo>()
     fun insertarIntervalo(extraerMateria: ExtraerMateria) {
         intervalos.add(extraerMateria.intervalo!!)
