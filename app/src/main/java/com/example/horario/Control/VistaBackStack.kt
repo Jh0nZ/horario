@@ -6,6 +6,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,8 +28,9 @@ import com.google.gson.GsonBuilder
 @OptIn(ExperimentalMaterial3Api::class)
 class VistaBackStack : ViewModel() {
     val stackList = mutableListOf<String>();
-    val backStackEnabled = mutableStateOf(false)
-    val currentLocation = mutableStateOf("/")
+    var currentLocation by mutableStateOf("")
+    var currentLocationPublic by mutableStateOf("")
+
     var carrera = Carrera("Ing Informatica")
     var currentSemestre = mutableStateOf("Seleccionar semestre")
     var currentSemestreObject: Semestre? = null
@@ -42,10 +44,13 @@ class VistaBackStack : ViewModel() {
     val editar_crear = mutableStateOf("crear")
     val currentOption = mutableStateOf("")
     val openSelectMateria = mutableStateOf(false)
+    var bottomMenuTitle by mutableStateOf("")
+
+    init {
+        navigateTo("Home")
+    }
 
     var grupoElimiar: Grupo? = null
-
-
     var grupoOriginal = Grupo("test", "test", "test", mutableStateOf(false))
     var grupoTemporalCopiar = Grupo("test", "test", "test", mutableStateOf(false))
 
@@ -54,7 +59,6 @@ class VistaBackStack : ViewModel() {
         .registerTypeAdapter(Materia::class.java, MateriaAdapter())
         .registerTypeAdapter(Grupo::class.java, GrupoAdapter())
         .create()
-
     fun guardarHorario(context: Context) {
         horario.value = contruirHorario.value
         contruirHorario.value = Horario()
@@ -64,7 +68,6 @@ class VistaBackStack : ViewModel() {
         editor.putString("horario", horarioJson)
         editor.apply()
     }
-
     fun guardarCambiosEditar(context: Context) {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val editor = prefs.edit()
@@ -72,41 +75,31 @@ class VistaBackStack : ViewModel() {
         editor.putString("horario", horarioJson)
         editor.apply()
     }
-
     fun cargarHorario(context: Context) {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val savedHorario = prefs.getString("horario", null)
         val horrr = gson.fromJson(savedHorario, Horario::class.java)?: Horario()
         horario.value = horrr
     }
-
     fun cargarCarrera(context: Context) {
-        val carreraGuardada = cargarCarreraDesdePrefs(context)
+        val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
+        val carreraJson = prefs.getString("carrera", null)
+        val carreraGuardada = gson.fromJson(carreraJson, Carrera::class.java)
         carrera = carreraGuardada ?: Carrera("Ing Informatica")
     }
-
     fun guardarCarrera(context: Context) {
-        guardarCarreraEnPrefs(carrera, context)
-    }
-    fun guardarCarreraEnPrefs(carrera: Carrera, context: Context) {
         val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
         val editor = prefs.edit()
         val carreraJson = gson.toJson(carrera)
         editor.putString("carrera", carreraJson)
         editor.apply()
     }
-    fun cargarCarreraDesdePrefs(context: Context): Carrera? {
-        val prefs = context.getSharedPreferences("carrera", Context.MODE_PRIVATE)
-        val carreraJson = prefs.getString("carrera", null)
-        return gson.fromJson(carreraJson, Carrera::class.java)
-    }
-
-
-
     fun navigateTo(elemento: String) {
         stackList.add(elemento)
-        backStackEnabled.value = true
-        currentLocation.value = elemento
+        currentLocation = elemento
+        if (elemento != "nav_drawer") {
+            currentLocationPublic = elemento
+        }
     }
     fun navigateUniqueTo(elemento: String) {
         stackList.removeAll { it == elemento }
@@ -114,19 +107,12 @@ class VistaBackStack : ViewModel() {
     }
     fun popStack() {
         if (stackList.isNotEmpty()) {
-            stackList.removeAt(stackList.size-1)
+            stackList.removeLast()
+            if (stackList.isNotEmpty()) {
+                currentLocation = stackList.last()
+                currentLocationPublic = stackList.last()
+            }
         }
-
-        if (stackList.isNotEmpty()) {
-            currentLocation.value = stackList.last()
-        } else {
-            currentLocation.value = "/"
-        }
-
-        backStackEnabled.value = stackList.isNotEmpty()
-    }
-    fun emptyStack(): Boolean {
-        return !backStackEnabled.value
     }
     override fun toString(): String {
         return stackList.toString()

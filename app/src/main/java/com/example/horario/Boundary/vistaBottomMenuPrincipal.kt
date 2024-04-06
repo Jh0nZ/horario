@@ -84,45 +84,57 @@ fun vistaBottomMenuPrincipal(
         sheetState = vistaBack.bottomSheetState2,
         scrimColor = Color.Transparent,
         //windowInsets = BottomSheetDefaults.windowInsets, //espacio arriba
-        onDismissRequest = {vistaBack.openBottomSheet.value = false},
+        onDismissRequest = {
+            vistaBack.openBottomSheet.value = false
+        },
         dragHandle = {
-            Text(text = "---------------") // esto esta arriba xd
+            Text(text = "---------------") // arriba del modalBottom
         }
     ) {
         Column  (
             modifier = Modifier.fillMaxSize()
         ) {
-            Box (
-                contentAlignment = Alignment.CenterStart,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        text = "Seleccionar grupo",
-                        textAlign = TextAlign.Center,
-                        fontSize = 22.sp,
-                        color = Color(231, 231, 231, 255)
-                    )
-                }
-                Row (
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxSize()
+                Box (
+                    modifier = Modifier.weight(2f)
                 ) {
                     IconButton(onClick = {
                         vistaBack.openBottomSheet.value = false
                     }) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = null)
                     }
+                }
+
+                Box (
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.weight(9f)
+                ) {
+                    Text(
+                        text = vistaBack.bottomMenuTitle,
+                        textAlign = TextAlign.Center,
+                        fontSize = 22.sp,
+                        color = Color(231, 231, 231, 255)
+                    )
+                }
+
+                Box (
+                    modifier = Modifier.weight(2f)
+                ) {
                     if (vistaBack.editar_crear.value != "editar_grupo") {
-                        IconButton(onClick = {
-                            vistaBack.editar_crear.value = if (vistaBack.editar_crear.value == "crear") "editar" else "crear"
-                        }) {
-                            Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = null)
+                        IconButton(
+                            onClick = {
+                                vistaBack.editar_crear.value = if (vistaBack.editar_crear.value == "crear") "editar" else "crear"
+                                vistaBack.bottomMenuTitle = if (vistaBack.editar_crear.value == "crear") "Seleccionar grupos" else "Grupos seleccionados"
+                            }
+                        ) {
+                            Row {
+                                Icon(imageVector = Icons.Outlined.Class, contentDescription = null)
+                                Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = null)
+                            }
                         }
                     } else {
                         IconButton(onClick = {
@@ -304,7 +316,9 @@ fun vistaBottomMenuPrincipal(
                                                                 Row (
                                                                     verticalAlignment = Alignment.CenterVertically,
                                                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                                                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+                                                                    modifier = Modifier
+                                                                        .fillMaxSize()
+                                                                        .padding(horizontal = 8.dp)
                                                                 ) {
                                                                     Box (
                                                                         modifier = Modifier.weight(10f)
@@ -375,7 +389,9 @@ fun vistaBottomMenuPrincipal(
                                 Row(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxSize().padding(8.dp)
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp)
                                 ) {
                                     Column(
                                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -608,7 +624,6 @@ fun vistaBottomMenuPrincipal(
                     }
                 }
             }
-
         }
     }
 }

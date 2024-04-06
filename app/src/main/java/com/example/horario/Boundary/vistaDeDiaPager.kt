@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -45,7 +46,9 @@ fun vistaDeDiaPager(
         initialPage = initialPage
     )
     val corutinaaa = rememberCoroutineScope()
-    Column {
+    Column (
+        modifier = Modifier.fillMaxSize()
+    ) {
         Row (
             horizontalArrangement = Arrangement.SpaceAround,
             modifier = modifier
@@ -79,33 +82,38 @@ fun vistaDeDiaPager(
                 }
             }
         }
-        HorizontalPager(
-            state = pagerState,
-            modifier = modifier.fillMaxSize()
-        ) { page ->
-            val dayOfWeek = when (page) {
-                0 -> DayOfWeek.MONDAY
-                1 -> DayOfWeek.TUESDAY
-                2 -> DayOfWeek.WEDNESDAY
-                3 -> DayOfWeek.THURSDAY
-                4 -> DayOfWeek.FRIDAY
-                5 -> DayOfWeek.SATURDAY
-                else -> DayOfWeek.SUNDAY
-            }
-            LazyColumn (
-                modifier = modifier.fillMaxSize()
-            ) {
-                item {
-                    Row (
+        LazyColumn (
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item {
+                Row (
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    horas(horario = vistaBack.horario)
+                    HorizontalPager(
+                        state = pagerState,
                         modifier = modifier.fillMaxSize()
-                    ) {
-                        horas(horario = vistaBack.horario)
-                        pruebasDias(
-                            ancho = 400.dp,
-                            modifier = modifier.fillMaxWidth(),
-                            horario = vistaBack.horario,
-                            dia = dayOfWeek
-                        )
+                    ) { page ->
+                        val dayOfWeek = when (page) {
+                            0 -> DayOfWeek.MONDAY
+                            1 -> DayOfWeek.TUESDAY
+                            2 -> DayOfWeek.WEDNESDAY
+                            3 -> DayOfWeek.THURSDAY
+                            4 -> DayOfWeek.FRIDAY
+                            5 -> DayOfWeek.SATURDAY
+                            else -> DayOfWeek.SUNDAY
+                        }
+                        Column (
+                            modifier = modifier.fillMaxSize()
+                        ) {
+
+                            pruebasDias(
+                                ancho = 400.dp,
+                                modifier = modifier.fillMaxWidth(),
+                                horario = vistaBack.horario,
+                                dia = dayOfWeek
+                            )
+                        }
                     }
                 }
             }

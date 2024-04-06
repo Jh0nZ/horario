@@ -14,6 +14,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,9 +33,9 @@ import androidx.compose.ui.unit.dp
 @Preview
 @Composable
 fun VistaAjustes() {
-    var notificacionesActivadas by remember { mutableStateOf(true) }
+    var notificacionesActivadas by remember { mutableStateOf(false) }
     var recordatoriosActivados by remember { mutableStateOf(false) }
-    var temaOscuroActivado by remember { mutableStateOf(false) }
+    var temaOscuroActivado by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -44,7 +45,8 @@ fun VistaAjustes() {
         Text(
             text = "Ajustes",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
+            color = Color(196, 196, 196, 255)
         )
 
         // Switch para notificaciones
@@ -73,7 +75,8 @@ fun VistaAjustes() {
         Text(
             text = "Opciones adicionales",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier.padding(vertical = 16.dp),
+            color = Color(196, 196, 196, 255)
         )
 
         // Opción 1
@@ -103,11 +106,15 @@ fun SwitchSetting(
     ) {
         Text(
             text = text,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = Color(196, 196, 196, 255)
         )
         Switch(
             checked = isChecked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = Color(231, 95, 255, 255)
+            )
         )
     }
 }
@@ -127,7 +134,8 @@ fun SettingItem(text: String, icon: ImageVector) {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = Color(196, 196, 196, 255)
         )
     }
 }

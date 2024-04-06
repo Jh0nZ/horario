@@ -179,9 +179,12 @@ fun horadia24(
         ) {
             Text(
                 text = formattedTime,
-                color = Color.Black,
+                color = Color.White
             )
-            Text(text = minutos.toString())
+            Text(
+                text = minutos.toString(),
+                color = Color.White
+            )
         }
         LazyColumn (
             state = scrollState
@@ -205,7 +208,8 @@ fun horadia24(
                                 ) {
                                     Text(
                                         text = texto,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        color = Color.White
                                     )
                                 }
                             }
@@ -217,7 +221,7 @@ fun horadia24(
                         ) {
                             //today.dayOfWeek
                             val lista = vistaBackStack.horario.value.obtenerDiaFormato24h(dayOfWeek)
-                            if (!lista.isEmpty()) {
+                            if (lista.isNotEmpty()) {
                                 for (intervalo in lista) {
                                     val colorTexto = if (CalcularLuminosidad(intervalo.color) < 0.5) Color.White else Color.Black
                                     Box(
@@ -225,8 +229,8 @@ fun horadia24(
                                             .height(intervalo.duracion.dp)
                                             .fillMaxWidth()
                                             .background(
-                                                if (intervalo.esChoque) Color(221, 221, 221, 255) else intervalo.color,
-                                                shape = RoundedCornerShape(10)
+                                                if (intervalo.nombre == null) Color.Transparent else intervalo.color,
+                                                shape = RoundedCornerShape(10.dp)
                                             ),
                                     ) {
                                         if (intervalo.nombre != null) {
@@ -259,8 +263,6 @@ fun horadia24(
                                                 }
                                             }
                                         }
-
-
                                     }
                                 }
                             }

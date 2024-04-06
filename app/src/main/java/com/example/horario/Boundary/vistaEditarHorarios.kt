@@ -47,11 +47,9 @@ fun vistaEditarHorario(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(34, 40, 49, 255))
             .padding(10.dp)
     ) {
        items(vistaBackStack.horario.value.grupos) {
-
            val colorTexto = if (CalcularLuminosidad(it.color) < 0.5) Color.White else Color.Black
            Button(
                colors = ButtonDefaults.buttonColors(
@@ -64,6 +62,7 @@ fun vistaEditarHorario(
                    vistaBackStack.grupoOriginal = it
                    vistaBackStack.grupoTemporalCopiar = it.copy()
                    vistaBackStack.editar_crear.value = "editar_grupo"
+                   vistaBackStack.bottomMenuTitle = "Editar materia"
                    vistaBackStack.openBottomSheet.value = true
                }
            ) {

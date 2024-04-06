@@ -7,11 +7,11 @@ android {
     namespace = "com.example.horario"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.example.horario"
+        applicationId = "jhon.xyz.horario"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

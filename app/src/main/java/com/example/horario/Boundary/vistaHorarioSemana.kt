@@ -46,12 +46,12 @@ fun vistaHorarioSemana(
             .fillMaxSize()
     ) {
         item {
-            LazyRow {
-                item {
-                    horas(horario = vistaBackStack.horario)
-                }
-                items(vistaBackStack.horario.value.getUsedDays()) {
-                    pruebasDias(horario = vistaBackStack.horario, dia = it)
+            Row {
+                horas(horario = vistaBackStack.horario)
+                LazyRow {
+                    items(vistaBackStack.horario.value.getUsedDays()) {
+                        pruebasDias(horario = vistaBackStack.horario, dia = it)
+                    }
                 }
             }
         }
@@ -61,7 +61,7 @@ fun vistaHorarioSemana(
 @Preview(showBackground = true)
 @Composable
 fun horas(
-    nombre: String = "HORAS",
+    nombre: String = "Hora",
     saltos: Int = 90,
     horario: MutableState<Horario> = mutableStateOf(Horario().ejemplo()),
     modifier: Modifier = Modifier,
@@ -73,6 +73,7 @@ fun horas(
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            color = Color.White,
             modifier = modifier
                 .height(40.dp)
                 .width(ancho)
@@ -81,8 +82,10 @@ fun horas(
         for (it in horario.value.obtenerHoras(90)) {
             Text(
                 text = it,
+                color = Color.White,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(Color.Transparent)
                     .height(saltos.dp)
                     .width(ancho)
             )
@@ -104,7 +107,7 @@ fun pruebasDias(
         Box(
             modifier = Modifier
                 .height(40.dp)
-                .background(Color.White)
+                .background(Color.Transparent)
                 .width(ancho),
             contentAlignment = Alignment.Center
         ) {
@@ -113,6 +116,7 @@ fun pruebasDias(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
+                color = Color.White,
             )
         }
 
@@ -158,7 +162,7 @@ fun pruebasDias(
             } else {
                 Spacer(
                     modifier = Modifier
-                        .background(inter.color)
+                        .background(Color.Transparent)
                         .height(inter.duracion.dp)
                         .width(ancho)
                 )
